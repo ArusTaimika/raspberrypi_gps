@@ -10,7 +10,7 @@ int server_1(){
 
     try {
         // IPアドレスとポート番号を指定して、UdpConnectインスタンスを作成
-        udp_lib::UdpConnect udpConnection("100.116.206.21", 8080, 2);
+        udp_lib::UdpConnect udpConnection("100.116.206.21", 4000, 3);
 
         // 送信するデータ
         std::vector<double> dataToSend = {20, 10, 0};
@@ -79,10 +79,10 @@ int receive_1(){
 }
 
 int main(){
-    //std::thread th1(server_1);
-    std::thread th2(receive_1);
+    std::thread th1(server_1);
+    //std::thread th2(receive_1);
 
-    //th1.join();
-    th2.join();
+    th1.join();
+    //th2.join();
     return 0;
 }

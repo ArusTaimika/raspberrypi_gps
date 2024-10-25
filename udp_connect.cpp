@@ -56,7 +56,7 @@ std::pair<std::vector<double>, std::chrono::nanoseconds> UdpConnect::udp_recv() 
     std::memcpy(received_values.data(), buffer, buffer_size);
 
     std::chrono::nanoseconds nano_system_clock;
-    std::memcpy(&nano_system_clock, buffer + buffer_size, sizeof(int));
+    std::memcpy(&nano_system_clock, buffer + buffer_size, sizeof(std::chrono::nanoseconds));
     return {received_values, nano_system_clock};
 }
 
