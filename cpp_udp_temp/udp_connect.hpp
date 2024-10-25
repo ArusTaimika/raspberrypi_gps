@@ -10,6 +10,8 @@
 #include <cstdlib>  // EXIT_FAILURE, exitのため
 #include <cstdio>   // perrorのため
 #include <iostream>
+#include <vector>
+#include <iterator>
 
 namespace udp_lib{
 
@@ -19,17 +21,19 @@ class UdpConnect{
     */
     int sock;
     struct sockaddr_in addr;
-    
+    size_t buffer_size;
+    char* buffer;
+
     public:
-        UdpConnect(std::string address, int port); // UDPコンストラクタ       
+
+        UdpConnect(std::string address, int port, size_t element_count); // UDPコンストラクタ       
         
-        void udp_send(double value); // UDP送信関数
+        void udp_send(const std::vector<double>& values); // UDP送信関数
 
         void udp_bind(); 
 
-        double udp_recv();
+        std::vector<double> udp_recv();
 
-        void udp_recv(char *buf, int size); // UDP受信関数
         
         ~UdpConnect();
 };

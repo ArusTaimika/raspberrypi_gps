@@ -12,6 +12,7 @@
 #include <iostream>
 #include <vector>
 #include <iterator>
+#include <chrono>
 
 namespace udp_lib{
 
@@ -22,17 +23,18 @@ class UdpConnect{
     int sock;
     struct sockaddr_in addr;
     size_t buffer_size;
+    size_t total_buffer_size;
     char* buffer;
 
     public:
 
         UdpConnect(std::string address, int port, size_t element_count); // UDPコンストラクタ       
         
-        void udp_send(const std::vector<double>& values); // UDP送信関数
+        void udp_send(const std::vector<double>& values , std::chrono::nanoseconds nano_system_clock); // UDP送信関数
 
         void udp_bind(); 
 
-        std::vector<double> udp_recv();
+        std::pair<std::vector<double>, std::chrono::nanoseconds> udp_recv();
 
         
         ~UdpConnect();
