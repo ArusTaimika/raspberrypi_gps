@@ -1,78 +1,54 @@
-#include <iostream>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <cstring>
+#include "udp_connect.hpp"
+#include <cstring>  // memsetを使うため
+#include <unistd.h> // closeを使うため
 
-class UdpConnect {
-public:
-    UdpConnect(const char* ip, int port, int dataPieces)
-        : ip(ip), port(port), dataPieces(dataPieces) {
-        // UDPソケットを作成
-        udpSocket = socket(AF_INET, SOCK_DGRAM, 0);
-        if (udpSocket < 0) {
-            std::cerr << "ソケット作成エラー" << std::endl;
-            exit(EXIT_FAILURE);
-        }
+namespace udp_lib {
 
-        sockaddr_in addr = {};
-        addr.sin_family = AF_INET;
-        addr.sin_port = htons(port);
-        addr.sin_addr.s_addr = inet_addr(ip);
-
-        // サーバーモードのときはバインド
-        if (strcmp(ip, "0.0.0.0") == 0) {
-            if (bind(udpSocket, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
-                std::cerr << "バインドエラー" << std::endl;
-                close(udpSocket);
-                exit(EXIT_FAILURE);
-            }
-        }
+// コンストラクタ
+UdpConnect::UdpConnect(std::string address, int port) {
+    /*
+    UDP通信する相手のIPアドレスとポート番号が引数
+    */
+    sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sock < 0) {
+        perror("Socket creation failed");
+        exit(EXIT_FAILURE);
     }
 
-    ~UdpConnect() {
-        close(udpSocket);
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = inet_addr(address.c_str());
+    addr.sin_port = htons(port);    
+}
+
+// UDP送信関数（double型データを送信）
+void UdpConnect::udp_send(double value) {
+    sendto(sock, &value, sizeof(value), 0, (struct sockaddr *)&addr, sizeof(addr));
+}
+
+// UDPバインド関数
+void UdpConnect::udp_bind() {
+    if (bind(sock, (const struct sockaddr *)&addr, sizeof(addr)) < 0) {
+        perror("Bind failed");
+        exit(EXIT_FAILURE);
     }
+}
 
-    void udpServer() {
-        sockaddr_in clientAddr = {};
-        socklen_t addrLen = sizeof(clientAddr);
-        char buffer[16]; // バッファサイズ16バイト
+// UDP受信関数（double型データを受信）
+double UdpConnect::udp_recv() {
+    double value;
+    recv(sock, &value, sizeof(value), 0);
+    return value;
+}
 
-        // データ受信
-        int receivedBytes = recvfrom(udpSocket, buffer, sizeof(buffer), 0, (struct sockaddr*)&clientAddr, &addrLen);
-        if (receivedBytes > 0) {
-            double* data = reinterpret_cast<double*>(buffer);
-            for (int i = 0; i < dataPieces; i++) {
-                std::cout << "Received: " << data[i] << std::endl;
-            }
-        } else {
-            std::cerr << "受信エラー" << std::endl;
-        }
-    }
+// UDP受信関数（バッファにdouble型データを格納）
+void UdpConnect::udp_recv(double *buf, int size) {
+    recv(sock, buf, size * sizeof(double), 0);  // sizeは要素数と仮定
+}
 
-private:
-    int udpSocket;
-    const char* ip;
-    int port;
-    int dataPieces;
-};
+// デストラクタ
+UdpConnect::~UdpConnect() {
+    close(sock);
+}
 
-int main() {
-    const char* ip = "0.0.0.0";
-    int port = 12345;
-    int dataPieces = 2;
 
-    UdpConnect udpConnect(ip, port, dataPieces);
-
-    try {
-        while (true) {
-            udpConnect.udpServer();
-        }
-    } catch (...) {
-        std::cerr << "エラーが発生しました。" << std::endl;
-    }
-
-    return 0;
 }
