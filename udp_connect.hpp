@@ -1,9 +1,15 @@
+#ifndef UDP_CONNECT_HPP
+#define UDP_CONNECT_HPP
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-#include <string.h>
+#include <cstring>
+#include <cstdlib>  // EXIT_FAILURE, exitのため
+#include <cstdio>   // perrorのため
+#include <iostream>
 
 namespace udp_lib{
 
@@ -29,3 +35,5 @@ class UdpConnect{
 };
 
 }
+
+#endif // UDP_CONNECT_HPP  // 3. ここでガードを閉じます

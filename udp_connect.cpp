@@ -1,6 +1,4 @@
 #include "udp_connect.hpp"
-#include <cstring>  // memsetを使うため
-#include <unistd.h> // closeを使うため
 
 namespace udp_lib {
 
@@ -41,7 +39,7 @@ double UdpConnect::udp_recv() {
 }
 
 // UDP受信関数（バッファにdouble型データを格納）
-void UdpConnect::udp_recv(double *buf, int size) {
+void UdpConnect::udp_recv(char *buf, int size) {
     recv(sock, buf, size * sizeof(double), 0);  // sizeは要素数と仮定
 }
 

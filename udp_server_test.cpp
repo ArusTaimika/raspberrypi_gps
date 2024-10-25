@@ -10,7 +10,7 @@ int main() {
 
     try {
         // IPアドレスとポート番号を指定して、UdpConnectインスタンスを作成
-        udp_lib::UdpConnect udpConnection("127.0.0.1", 8080);
+        udp_lib::UdpConnect udpConnection("100.91.239.110", 4000);
 
         // 送信するデータ
         double dataToSend = 123.456;
