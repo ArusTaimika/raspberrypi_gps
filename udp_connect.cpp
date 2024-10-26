@@ -20,7 +20,7 @@ UdpConnect::UdpConnect(std::string address, int port, size_t element_count) {
     //bufferの値を定義
     buffer_size = element_count * sizeof(double);
     total_buffer_size = buffer_size + sizeof(std::chrono::nanoseconds);
-    buffer = new char [buffer_size];
+    buffer = new char [total_buffer_size];
 }
 
 // UDP送信関数（double型データを送信）
