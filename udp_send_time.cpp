@@ -66,6 +66,9 @@ int receive_1(){
             
             // 出力
             std::cout << "delay time: " <<  delay_time.count() << std::endl;
+
+            //csv出力
+            
             // 少し待機して次の受信へ（必要であれば待機時間を調整可能）
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
