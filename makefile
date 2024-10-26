@@ -8,7 +8,7 @@ CFLAGS = -Wall
 TARGET = run
 
 # (4) コンパイル対象のソースコード
-SRCS = csv_test.cpp csv_edit.cpp
+SRCS = udp_send_time.cpp csv_edit.cpp udp_connect.cpp
 
 # (5) オブジェクトファイル名
 OBJS = $(SRCS:.cpp=.o)

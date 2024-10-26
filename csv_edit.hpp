@@ -21,7 +21,7 @@ class Csvedit{
         Csvedit(const std::string &filename);
 
         void csv_write_headers(const std::vector<std::string> &headers);
-        void csv_write_data(const std::pair<std::vector<double>, std::chrono::nanoseconds> &data);
+        void csv_write_data(const std::vector<std::chrono::nanoseconds> &data);
         
         ~Csvedit();
 };

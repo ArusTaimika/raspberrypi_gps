@@ -1,4 +1,5 @@
 #include "udp_connect.hpp"
+#include "csv_edit.hpp"
 #include <chrono>
 #include <thread>
 
@@ -43,15 +44,20 @@ int receive_1(){
     try {
         // IPアドレスとポート番号を指定して、UdpConnectインスタンスを作成
         udp_lib::UdpConnect udpConnection("0.0.0.0", 4000, 3);  // "0.0.0.0"はすべてのIPアドレスからの接続を受け入れる
-
         // バインド（サーバーとして動作するために必要）
         udpConnection.udp_bind();
-
         // システムクロック定義
         std::chrono::nanoseconds nano_receive_clock;
         std::chrono::nanoseconds nano_server_clock;
         std::chrono::nanoseconds delay_time;
         
+        // 出力するcsvファイルを指定して，インスタンスを作成
+        csv_lib::Csvedit csvWriter("compare_time.csv");
+        // csv_ヘッダを設定
+        csvWriter.csv_write_headers({"server_time", "client_time", "delay_time"});
+        // 送信データの型定義
+        std::vector<std::chrono::nanoseconds>  send_data;        
+
         // データ受信を無限ループで行う
         while (true) {
             // UDP受信
@@ -68,7 +74,10 @@ int receive_1(){
             std::cout << "delay time: " <<  delay_time.count() << std::endl;
 
             //csv出力
-            
+            send_data = {nano_server_clock, nano_receive_clock, delay_time};
+            // データをペア型にして書き込み
+            csvWriter.csv_write_data(send_data);
+
             // 少し待機して次の受信へ（必要であれば待機時間を調整可能）
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
@@ -82,10 +91,10 @@ int receive_1(){
 }
 
 int main(){
-    std::thread th1(server_1);
-    //std::thread th2(receive_1);
+    //std::thread th1(server_1);
+    std::thread th2(receive_1);
 
-    th1.join();
-    //th2.join();
+    //th1.join();
+    th2.join();
     return 0;
 }
