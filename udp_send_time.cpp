@@ -1,5 +1,8 @@
 #include "udp_connect.hpp"
 #include "csv_edit.hpp"
+#include "gpio_pulse.hpp"
+
+#include <iostream>
 #include <chrono>
 #include <thread>
 
@@ -16,6 +19,11 @@ int server_1(){
         // 送信するデータ
         std::vector<double> dataToSend = {20, 10, 0};
 
+        /*
+         パルス波形を出力初期化
+        */
+        GpioPulseGenerator pulseGenerator("gpiochip0", 16, 500, 1000);
+
         // データ送信を無限ループで行う
         while (true) {
             //現在時刻取得
@@ -23,6 +31,9 @@ int server_1(){
             std::chrono::nanoseconds nano_system_clock = std::chrono::duration_cast<std::chrono::nanoseconds>(server_clock.time_since_epoch());
             // UDP送信
             udpConnection.udp_send(dataToSend, nano_system_clock); // std::chrono::nanoseconds　はint64_tのサイズ数
+            
+            //パルス波形を出力
+            pulseGenerator.start();
             // 出力
             std::cout << "Data sent: " ;
             std::copy(dataToSend.begin(), dataToSend.end(), std::ostream_iterator<double>(std::cout, " "));
@@ -42,6 +53,9 @@ int server_1(){
 
 int receive_1(){
     try {
+        /*
+         UDP通信初期化
+        */
         // IPアドレスとポート番号を指定して、UdpConnectインスタンスを作成
         udp_lib::UdpConnect udpConnection("0.0.0.0", 4000, 3);  // "0.0.0.0"はすべてのIPアドレスからの接続を受け入れる
         // バインド（サーバーとして動作するために必要）
@@ -51,6 +65,9 @@ int receive_1(){
         std::chrono::nanoseconds nano_server_clock;
         std::chrono::nanoseconds delay_time;
         
+        /*
+         CSVクラス初期化
+        */
         // 出力するcsvファイルを指定して，インスタンスを作成
         csv_lib::Csvedit csvWriter("compare_time.csv");
         // csv_ヘッダを設定
@@ -58,6 +75,10 @@ int receive_1(){
         // 送信データの型定義
         std::vector<std::chrono::nanoseconds>  send_data;        
 
+        /*
+         パルス波形を出力初期化
+        */
+        GpioPulseGenerator pulseGenerator("gpiochip0", 16, 500, 1000);
         // データ受信を無限ループで行う
         while (true) {
             // UDP受信
@@ -66,13 +87,14 @@ int receive_1(){
             // 現在時刻取得
             std::chrono::high_resolution_clock::time_point receive_clock = std::chrono::high_resolution_clock::now();
             nano_receive_clock = std::chrono::duration_cast<std::chrono::nanoseconds>(receive_clock.time_since_epoch());
-            
             // delay計算
             delay_time = nano_receive_clock - nano_server_clock;
             
+            //パルス波形を出力
+            pulseGenerator.start();
+
             // 出力
             std::cout << "delay time: " <<  delay_time.count() << std::endl;
-
             //csv出力
             send_data = {nano_server_clock, nano_receive_clock, delay_time};
             // データをペア型にして書き込み
@@ -91,10 +113,10 @@ int receive_1(){
 }
 
 int main(){
-    //std::thread th1(server_1);
-    std::thread th2(receive_1);
+    std::thread th1(server_1);
+    //std::thread th2(receive_1);
 
-    //th1.join();
-    th2.join();
+    th1.join();
+    //th2.join();
     return 0;
 }

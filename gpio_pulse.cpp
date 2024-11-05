@@ -43,6 +43,7 @@ void GpioPulseGenerator::start() {
     
 }
 
+/*
 int main() {
     try {
         GpioPulseGenerator pulseGenerator("gpiochip0", 16, 500, 1000);
@@ -55,3 +56,4 @@ int main() {
     }
     return 0;
 }
+*/
