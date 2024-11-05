@@ -42,27 +42,22 @@ void GpioPulseGenerator::start() {
     std::this_thread::sleep_for(std::chrono::milliseconds(period_ms_ - pulse_duration_ms_));
     
 }
+/*
 
 int main() {
     try {
-        GpioPulseGenerator pulseGenerator("gpiochip0", 16, 500, 1000);
-
-        // 前回のパルス出力時間を記録する変数
-        auto last_pulse_time = std::chrono::system_clock::now();
+        GpioPulseGenerator pulseGenerator("gpiochip0", 16, 250, 500);
 
         while (true) {
-            // 現在の時間を取得
+            // 現在の時刻を秒で取得
             auto now = std::chrono::system_clock::now();
-            auto time_since_epoch = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count();
+            auto next_pulse_time = std::chrono::time_point_cast<std::chrono::seconds>(now) + std::chrono::seconds(1);
 
-            // システムクロックが整数秒（1.00秒）に一致した場合にパルス出力
-            if (time_since_epoch % 1 == 0 && now - last_pulse_time >= std::chrono::seconds(1)) {
-                pulseGenerator.start();  // パルス出力
-                last_pulse_time = now;
-            }
+            // 次の整数秒まで待機
+            std::this_thread::sleep_until(next_pulse_time);
 
-            // 余分なCPU消費を防ぐため少し待機
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            // パルス出力を開始
+            pulseGenerator.start();
         }
 
     } catch (const std::exception &e) {
@@ -71,3 +66,4 @@ int main() {
     }
     return 0;
 }
+*/

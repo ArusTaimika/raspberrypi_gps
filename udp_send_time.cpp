@@ -22,7 +22,7 @@ int server_1(){
         /*
          パルス波形を出力初期化
         */
-        GpioPulseGenerator pulseGenerator("gpiochip0", 16, 500, 1000);
+        GpioPulseGenerator pulseGenerator("gpiochip0", 16, 250, 500);
 
         // データ送信を無限ループで行う
         while (true) {
@@ -78,7 +78,7 @@ int receive_1(){
         /*
          パルス波形を出力初期化
         */
-        GpioPulseGenerator pulseGenerator("gpiochip0", 16, 500, 1000);
+        GpioPulseGenerator pulseGenerator("gpiochip0", 16, 250, 500);
         // データ受信を無限ループで行う
         while (true) {
             // UDP受信
@@ -87,11 +87,12 @@ int receive_1(){
             // 現在時刻取得
             std::chrono::high_resolution_clock::time_point receive_clock = std::chrono::high_resolution_clock::now();
             nano_receive_clock = std::chrono::duration_cast<std::chrono::nanoseconds>(receive_clock.time_since_epoch());
-            // delay計算
-            delay_time = nano_receive_clock - nano_server_clock;
             
             //パルス波形を出力
             pulseGenerator.start();
+            
+            // delay計算
+            delay_time = nano_receive_clock - nano_server_clock;            
 
             // 出力
             std::cout << "delay time: " <<  delay_time.count() << std::endl;
@@ -101,7 +102,7 @@ int receive_1(){
             csvWriter.csv_write_data(send_data);
 
             // 少し待機して次の受信へ（必要であれば待機時間を調整可能）
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
 
     } catch (const std::exception &e) {
