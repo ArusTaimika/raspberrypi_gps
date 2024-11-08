@@ -2,13 +2,13 @@
 CC = g++
 
 # (2) コンパイルオプション
-CFLAGS = -Wall
+CFLAGS = -Wall 
 
 # (3) 実行ファイル名
 TARGET = run
 
 # (4) コンパイル対象のソースコード
-SRCS = udp_connect.cpp udp_thread_test.cpp
+SRCS = udp_send_time.cpp csv_edit.cpp udp_connect.cpp gpio_pulse.cpp
 
 # (5) オブジェクトファイル名
 OBJS = $(SRCS:.cpp=.o)
@@ -17,10 +17,10 @@ OBJS = $(SRCS:.cpp=.o)
 INCDIR = -I../inc
 
 # (7) ライブラリファイルのあるディレクトリパス
-# LIBDIR = 
+#  LIBDIR = 
 
 # (8) 追加するライブラリファイル
-# LIBS = 
+LIBS = -lgpiod 
 
 # (9) ターゲットファイル生成
 $(TARGET): $(OBJS)
