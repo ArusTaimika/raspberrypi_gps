@@ -56,8 +56,6 @@ int receive_1(){
         udpConnection.udp_bind();
         // システムクロック定義
         std::chrono::nanoseconds nano_receive_clock;
-        std::chrono::nanoseconds nano_server_clock;
-        std::chrono::nanoseconds delay_time;
         
         /*
          CSVクラス初期化
@@ -65,31 +63,26 @@ int receive_1(){
         // 出力するcsvファイルを指定して，インスタンスを作成
         csv_lib::Csvedit csvWriter("compare_time.csv");
         // csv_ヘッダを設定
-        csvWriter.csv_write_headers({"server_time", "client_time", "delay_time"});
-        // 送信データの型定義
-        std::vector<std::chrono::nanoseconds>  send_data;
+        csvWriter.csv_write_headers({"count", "client_time"});
+        // csvデータの型定義
+        std::pair<int, int>  send_data;
 
         // データ受信を無限ループで行う
         while (true) {
             // UDP受信
-            std::pair<int, std::chrono::nanoseconds> receivedData = udpConnection.udp_recv();// pairはfirst, secondで抽出可能
-            nano_server_clock = receivedData.second;
+            int receivedData = udpConnection.udp_recv();// pairはfirst, secondで抽出可能
+
             // 現在時刻取得
             std::chrono::high_resolution_clock::time_point receive_clock = std::chrono::high_resolution_clock::now();
-            nano_receive_clock = std::chrono::duration_cast<std::chrono::nanoseconds>(receive_clock.time_since_epoch());
-            
-            // delay計算
-            delay_time = nano_receive_clock - nano_server_clock;            
-
-            // 出力
-            std::cout << "delay time: " <<  delay_time.count() << std::endl;
+            nano_receive_clock = std::chrono::duration_cast<std::chrono::nanoseconds>(receive_clock.time_since_epoch());    
+            std::cout << "Data sent: " ;
+            std::cout << receivedData;
+            std::cout << std::endl;
             //csv出力
-            send_data = {nano_server_clock, nano_receive_clock, delay_time};
+            send_data = std::make_pair(receivedData, nano_receive_clock.count());
             // データをペア型にして書き込み
             csvWriter.csv_write_data(send_data);
 
-            // 少し待機して次の受信へ（必要であれば待機時間を調整可能）
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
 
     } catch (const std::exception &e) {
@@ -101,10 +94,10 @@ int receive_1(){
 }
 
 int main(){
-    std::thread th1(server_1);
-    //std::thread th2(receive_1);
+    //std::thread th1(server_1);
+    std::thread th2(receive_1);
 
-    th1.join();
-    //th2.join();
+    //th1.join();
+    th2.join();
     return 0;
 }

@@ -34,7 +34,7 @@ class UdpConnect{
 
         void udp_bind(); 
 
-        std::pair<int, std::chrono::nanoseconds> udp_recv();
+        int udp_recv();
 
         
         ~UdpConnect();

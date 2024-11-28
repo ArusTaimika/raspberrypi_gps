@@ -19,7 +19,7 @@ UdpConnect::UdpConnect(std::string address, int port) {
     
     //bufferの値を定義
     buffer_size = sizeof(int); // カウント数
-    total_buffer_size = buffer_size + sizeof(std::chrono::nanoseconds);
+    total_buffer_size = buffer_size ;
     buffer = new char [total_buffer_size];
 }
 
@@ -41,7 +41,7 @@ void UdpConnect::udp_bind() {
 }
 
 // UDP受信関数（double型データを受信）
-std::pair<int, std::chrono::nanoseconds> UdpConnect::udp_recv() {
+int UdpConnect::udp_recv() {
     struct sockaddr_in sender_addr;
     socklen_t addr_len = sizeof(sender_addr);
     //データ受信
@@ -55,9 +55,7 @@ std::pair<int, std::chrono::nanoseconds> UdpConnect::udp_recv() {
     int received_values;
     std::memcpy(&received_values, buffer, buffer_size);
 
-    std::chrono::nanoseconds nano_system_clock;
-    std::memcpy(&nano_system_clock, buffer + buffer_size, sizeof(std::chrono::nanoseconds));
-    return {received_values, nano_system_clock};
+    return received_values;
 }
 
 
