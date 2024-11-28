@@ -3,7 +3,7 @@
 namespace udp_lib {
 
 // コンストラクタ
-UdpConnect::UdpConnect(std::string address, int port, size_t element_count) {
+UdpConnect::UdpConnect(std::string address, int port) {
     /*
     UDP通信する相手のIPアドレスとポート番号が引数
     */
@@ -18,17 +18,17 @@ UdpConnect::UdpConnect(std::string address, int port, size_t element_count) {
     addr.sin_port = htons(port);
     
     //bufferの値を定義
-    buffer_size = element_count * sizeof(double);
+    buffer_size = sizeof(int); // カウント数
     total_buffer_size = buffer_size + sizeof(std::chrono::nanoseconds);
     buffer = new char [total_buffer_size];
 }
 
 // UDP送信関数（double型データを送信）
-void UdpConnect::udp_send(const std::vector<double>& values, std::chrono::nanoseconds nano_system_clock) {
+void UdpConnect::udp_send(const int values, std::chrono::nanoseconds nano_system_clock) {
     // valuesの値をbafferにコピー
-    std::memcpy(buffer, values.data(), buffer_size);
+    std::memcpy(buffer, &values, buffer_size);
     // nano_system_clockをbafferの末尾にコピー
-    std::memcpy(buffer + values.size() * sizeof(double), &nano_system_clock, sizeof(std::chrono::nanoseconds)); // ＋で末尾に移動
+    std::memcpy(buffer + sizeof(int), &nano_system_clock, sizeof(std::chrono::nanoseconds)); // ＋で末尾に移動
     sendto(sock, buffer, total_buffer_size, 0, (struct sockaddr *)&addr, sizeof(addr));
 }
 
@@ -41,7 +41,7 @@ void UdpConnect::udp_bind() {
 }
 
 // UDP受信関数（double型データを受信）
-std::pair<std::vector<double>, std::chrono::nanoseconds> UdpConnect::udp_recv() {
+std::pair<int, std::chrono::nanoseconds> UdpConnect::udp_recv() {
     struct sockaddr_in sender_addr;
     socklen_t addr_len = sizeof(sender_addr);
     //データ受信
@@ -52,8 +52,8 @@ std::pair<std::vector<double>, std::chrono::nanoseconds> UdpConnect::udp_recv() 
         return {};
     }
     // 受信データをstd::vector<double>に変換
-    std::vector<double> received_values(buffer_size / sizeof(double));
-    std::memcpy(received_values.data(), buffer, buffer_size);
+    int received_values;
+    std::memcpy(&received_values, buffer, buffer_size);
 
     std::chrono::nanoseconds nano_system_clock;
     std::memcpy(&nano_system_clock, buffer + buffer_size, sizeof(std::chrono::nanoseconds));
