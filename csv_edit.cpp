@@ -29,7 +29,7 @@ void Csvedit::csv_write_headers(const std::vector<std::string> &headers) {
 }
 
 // データをCSVファイルに書き込むメソッド
-void Csvedit::csv_write_data(const std::pair<int, double> &data) {
+void Csvedit::csv_write_data(const std::pair<int, std::chrono::nanoseconds> &data) {
 
     if (!file.is_open()) {
         std::cerr << "ファイルを開けませんでした: " << filename << std::endl;
@@ -38,7 +38,7 @@ void Csvedit::csv_write_data(const std::pair<int, double> &data) {
 
     file << data.first;
     file << ",";
-    file << data.second;
+    file << data.second.count();
     file << "\n"; // 行末に改行を追加
     file.flush();  // バッファの内容をファイルに書き込む
 
