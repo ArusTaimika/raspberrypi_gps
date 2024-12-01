@@ -65,7 +65,7 @@ int receive_1(){
         // csv_ヘッダを設定
         csvWriter.csv_write_headers({"count", "client_time"});
         // csvデータの型定義
-        std::pair<int, int>  send_data;
+        std::pair<int, double>  send_data;
 
         // データ受信を無限ループで行う
         while (true) {
@@ -77,9 +77,11 @@ int receive_1(){
             nano_receive_clock = std::chrono::duration_cast<std::chrono::nanoseconds>(receive_clock.time_since_epoch());    
             std::cout << "Data sent: " ;
             std::cout << receivedData;
+            std::cout << "Now Time: " ;
+            std::cout << nano_receive_clock.count();
             std::cout << std::endl;
             //csv出力
-            send_data = std::make_pair(receivedData, nano_receive_clock.count());
+            send_data = std::make_pair(receivedData, (double)nano_receive_clock.count());
             // データをペア型にして書き込み
             csvWriter.csv_write_data(send_data);
 
