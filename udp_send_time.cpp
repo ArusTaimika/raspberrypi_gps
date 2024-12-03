@@ -14,10 +14,10 @@ int server_1(){
 
     try {
         // IPアドレスとポート番号を指定して、UdpConnectインスタンスを作成
-        udp_lib::UdpConnect udpConnection("100.116.206.21", 4000, 3);
+        udp_lib::UdpConnect udpConnection("100.116.206.21", 4000, 64);
 
         // 送信するデータ
-        std::vector<double> dataToSend = {20, 10, 0};
+        std::vector<double> dataToSend = {1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4};
 
         /*
          パルス波形を出力初期化
@@ -57,7 +57,7 @@ int receive_1(){
          UDP通信初期化
         */
         // IPアドレスとポート番号を指定して、UdpConnectインスタンスを作成
-        udp_lib::UdpConnect udpConnection("0.0.0.0", 4000, 3);  // "0.0.0.0"はすべてのIPアドレスからの接続を受け入れる
+        udp_lib::UdpConnect udpConnection("0.0.0.0", 4000, 64);  // "0.0.0.0"はすべてのIPアドレスからの接続を受け入れる
         // バインド（サーバーとして動作するために必要）
         udpConnection.udp_bind();
         // システムクロック定義
