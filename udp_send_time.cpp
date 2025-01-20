@@ -72,10 +72,9 @@ int receive_1(){
         // 出力するcsvファイルを指定して，インスタンスを作成
         csv_lib::Csvedit csvWriter("compare_time.csv");
         // csv_ヘッダを設定
-        csvWriter.csv_write_headers({"server_time", "client_time", "delay_time"});
-        // csvデータの型定義
-        //std::vector<std::chrono::nanoseconds>  send_data;        
-
+        csvWriter.csv_write_headers({"MRpx", "MRpy","MRth","CRpx", "CRpy","CRth","count","Time"});
+        // csvデータの型定義  
+        std::pair<std::pair<std::vector<double>, int> ,std::chrono::nanoseconds> csv_data;
         /*
          パルス波形を出力初期化
         */
@@ -96,11 +95,11 @@ int receive_1(){
             //delay_time = nano_receive_clock - nano_server_clock;            
 
             // 出力
-            std::cout << "receive time: " <<  nano_receive_clock.count() << std::endl;
+            std::cout << "roop_count : " << receivedData.second << std::endl;
             //csv出力
-            //send_data = {nano_server_clock, nano_receive_clock, delay_time};
+            csv_data = {receivedData, nano_receive_clock};
             // データをペア型にして書き込み
-            csvWriter.csv_write_data(receivedData);
+            csvWriter.csv_write_data(csv_data);
 
             // 少し待機して次の受信へ（必要であれば待機時間を調整可能）
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
