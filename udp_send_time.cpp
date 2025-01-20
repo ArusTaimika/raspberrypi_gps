@@ -14,10 +14,10 @@ int server_1(){
 
     try {
         // IPアドレスとポート番号を指定して、UdpConnectインスタンスを作成
-        udp_lib::UdpConnect udpConnection("100.66.251.116", 4000, 3);
+        udp_lib::UdpConnect udpConnection("100.66.251.116", 4000, 6);
 
         // 送信するデータ
-        std::vector<double> dataToSend = {20, 10, 0};
+        std::vector<double> dataToSend = {20, 10, 0,1,2,3};
 
         /*
          パルス波形を出力初期化
@@ -58,7 +58,7 @@ int receive_1(){
          UDP通信初期化
         */
         // IPアドレスとポート番号を指定して、UdpConnectインスタンスを作成
-        udp_lib::UdpConnect udpConnection("0.0.0.0", 4000, 3);  // "0.0.0.0"はすべてのIPアドレスからの接続を受け入れる
+        udp_lib::UdpConnect udpConnection("0.0.0.0", 4000, 6);  // "0.0.0.0"はすべてのIPアドレスからの接続を受け入れる
         // バインド（サーバーとして動作するために必要）
         udpConnection.udp_bind();
         // システムクロック定義
@@ -96,7 +96,7 @@ int receive_1(){
             //delay_time = nano_receive_clock - nano_server_clock;            
 
             // 出力
-            //std::cout << "delay time: " <<  delay_time.count() << std::endl;
+            std::cout << "receive time: " <<  nano_receive_clock.count() << std::endl;
             //csv出力
             //send_data = {nano_server_clock, nano_receive_clock, delay_time};
             // データをペア型にして書き込み
@@ -115,10 +115,10 @@ int receive_1(){
 }
 
 int main(){
-    std::thread th1(server_1);
-    //std::thread th2(receive_1);
+    //std::thread th1(server_1);
+    std::thread th2(receive_1);
 
-    th1.join();
-    //th2.join();
+    //th1.join();
+    th2.join();
     return 0;
 }
