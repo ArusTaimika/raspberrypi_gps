@@ -28,7 +28,7 @@ void UdpConnect::udp_send(const std::vector<double>& values, int roop_count) {
     // valuesの値をbafferにコピー
     std::memcpy(buffer, values.data(), buffer_size);
     // nano_system_clockをbafferの末尾にコピー
-    std::memcpy(buffer + values.size() * sizeof(double), &nano_system_clock, sizeof(int)); // ＋で末尾に移動
+    std::memcpy(buffer + values.size() * sizeof(double), &roop_count, sizeof(int)); // ＋で末尾に移動
     sendto(sock, buffer, total_buffer_size, 0, (struct sockaddr *)&addr, sizeof(addr));
 }
 

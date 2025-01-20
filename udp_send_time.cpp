@@ -14,7 +14,7 @@ int server_1(){
 
     try {
         // IPアドレスとポート番号を指定して、UdpConnectインスタンスを作成
-        udp_lib::UdpConnect udpConnection("100.116.206.21", 4000, 3);
+        udp_lib::UdpConnect udpConnection("100.66.251.116", 4000, 3);
 
         // 送信するデータ
         std::vector<double> dataToSend = {20, 10, 0};
@@ -63,8 +63,8 @@ int receive_1(){
         udpConnection.udp_bind();
         // システムクロック定義
         std::chrono::nanoseconds nano_receive_clock;
-        std::chrono::nanoseconds nano_server_clock;
-        std::chrono::nanoseconds delay_time;
+        //std::chrono::nanoseconds nano_server_clock;
+        //std::chrono::nanoseconds delay_time;
         
         /*
          CSVクラス初期化
