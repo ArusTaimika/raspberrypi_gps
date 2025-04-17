@@ -30,11 +30,11 @@ class UdpConnect{
 
         UdpConnect(std::string address, int port, size_t element_count); // UDPコンストラクタ       
         
-        void udp_send(const std::vector<double>& values , std::chrono::nanoseconds nano_system_clock); // UDP送信関数
+        void udp_send(const std::vector<double>& values , int roop_count); // UDP送信関数
 
         void udp_bind(); 
 
-        std::pair<std::vector<double>, std::chrono::nanoseconds> udp_recv();
+        std::pair<std::vector<double>, int> udp_recv();
 
         
         ~UdpConnect();

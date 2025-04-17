@@ -14,26 +14,27 @@ int server_1(){
 
     try {
         // IPアドレスとポート番号を指定して、UdpConnectインスタンスを作成
-        udp_lib::UdpConnect udpConnection("100.116.206.21", 4000, 3);
+        udp_lib::UdpConnect udpConnection("100.66.251.116", 4000, 6);
 
         // 送信するデータ
-        std::vector<double> dataToSend = {20, 10, 0};
+        std::vector<double> dataToSend = {20, 10, 0,1,2,3};
 
         /*
          パルス波形を出力初期化
         */
-        GpioPulseGenerator pulseGenerator("gpiochip0", 16, 250, 500);
-
+        //GpioPulseGenerator pulseGenerator("gpiochip0", 16, 250, 500);
+        int roop_count = 0;
         // データ送信を無限ループで行う
         while (true) {
             //現在時刻取得
-            std::chrono::high_resolution_clock::time_point server_clock = std::chrono::high_resolution_clock::now();
-            std::chrono::nanoseconds nano_system_clock = std::chrono::duration_cast<std::chrono::nanoseconds>(server_clock.time_since_epoch());
+            // std::chrono::high_resolution_clock::time_point server_clock = std::chrono::high_resolution_clock::now();
+            // std::chrono::nanoseconds nano_system_clock = std::chrono::duration_cast<std::chrono::nanoseconds>(server_clock.time_since_epoch());
+            roop_count ++;
             // UDP送信
-            udpConnection.udp_send(dataToSend, nano_system_clock); // std::chrono::nanoseconds　はint64_tのサイズ数
+            udpConnection.udp_send(dataToSend, roop_count); // std::chrono::nanoseconds　はint64_tのサイズ数
             
             //パルス波形を出力
-            pulseGenerator.start();
+            //pulseGenerator.start();
             // 出力
             std::cout << "Data sent: " ;
             std::copy(dataToSend.begin(), dataToSend.end(), std::ostream_iterator<double>(std::cout, " "));
@@ -51,58 +52,130 @@ int server_1(){
     return EXIT_SUCCESS;
 }
 
-int receive_1(){
+int receive_1(std::string from_name, int port){
     try {
         /*
          UDP通信初期化
         */
         // IPアドレスとポート番号を指定して、UdpConnectインスタンスを作成
-        udp_lib::UdpConnect udpConnection("0.0.0.0", 4000, 3);  // "0.0.0.0"はすべてのIPアドレスからの接続を受け入れる
+        udp_lib::UdpConnect udpConnection("0.0.0.0", port, 6);  // "0.0.0.0"はすべてのIPアドレスからの接続を受け入れる
+        udp_lib::UdpConnect udpConnection_send_test("100.116.206.21", 3000, 6);
         // バインド（サーバーとして動作するために必要）
         udpConnection.udp_bind();
         // システムクロック定義
         std::chrono::nanoseconds nano_receive_clock;
-        std::chrono::nanoseconds nano_server_clock;
-        std::chrono::nanoseconds delay_time;
+        //std::chrono::nanoseconds nano_server_clock;
+        //std::chrono::nanoseconds delay_time;
         
         /*
          CSVクラス初期化
         */
         // 出力するcsvファイルを指定して，インスタンスを作成
-        csv_lib::Csvedit csvWriter("compare_time.csv");
+        std::string baseName = "raspiA_time_";
+        std::string extension = ".csv";
+        // ファイル名を生成
+        std::string fileName = baseName + from_name + extension;
+        csv_lib::Csvedit csvWriter(fileName);
         // csv_ヘッダを設定
-        csvWriter.csv_write_headers({"server_time", "client_time", "delay_time"});
-        // 送信データの型定義
-        std::vector<std::chrono::nanoseconds>  send_data;        
-
+        csvWriter.csv_write_headers({"MRpx", "MRpy","MRth","CRpx", "CRpy","CRth","count","Time"});
+        // csvデータの型定義  
+        std::pair<std::pair<std::vector<double>, int> ,std::chrono::nanoseconds> csv_data;
         /*
          パルス波形を出力初期化
         */
-        GpioPulseGenerator pulseGenerator("gpiochip0", 16, 250, 500);
+        //GpioPulseGenerator pulseGenerator("gpiochip0", 16, 250, 500);
         // データ受信を無限ループで行う
         while (true) {
             // UDP受信
-            std::pair<std::vector<double>, std::chrono::nanoseconds> receivedData = udpConnection.udp_recv();// pairはfirst, secondで抽出可能
-            nano_server_clock = receivedData.second;
+            std::pair<std::vector<double>, int> receivedData = udpConnection.udp_recv();// pairはfirst, secondで抽出可能
+            
+            //nano_server_clock = receivedData.second;
             // 現在時刻取得
             std::chrono::high_resolution_clock::time_point receive_clock = std::chrono::high_resolution_clock::now();
             nano_receive_clock = std::chrono::duration_cast<std::chrono::nanoseconds>(receive_clock.time_since_epoch());
-            
+            udpConnection_send_test.udp_send(receivedData.first, receivedData.second);
             //パルス波形を出力
-            pulseGenerator.start();
+            //pulseGenerator.start();
             
             // delay計算
-            delay_time = nano_receive_clock - nano_server_clock;            
+            //delay_time = nano_receive_clock - nano_server_clock;            
 
             // 出力
-            std::cout << "delay time: " <<  delay_time.count() << std::endl;
+            std::cout << "roop_count : " << receivedData.second << std::endl;
             //csv出力
-            send_data = {nano_server_clock, nano_receive_clock, delay_time};
+            csv_data = {receivedData, nano_receive_clock};
             // データをペア型にして書き込み
-            csvWriter.csv_write_data(send_data);
+            csvWriter.csv_write_data(csv_data);
 
             // 少し待機して次の受信へ（必要であれば待機時間を調整可能）
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            //std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+
+    } catch (const std::exception &e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+
+int receive_0(std::string from_name, int port){
+    try {
+        /*
+         UDP通信初期化
+        */
+        // IPアドレスとポート番号を指定して、UdpConnectインスタンスを作成
+        udp_lib::UdpConnect udpConnection("0.0.0.0", port, 6);  // "0.0.0.0"はすべてのIPアドレスからの接続を受け入れる
+        udp_lib::UdpConnect udpConnection_send_test("100.116.206.21", 9000, 6);
+        // バインド（サーバーとして動作するために必要）
+        udpConnection.udp_bind();
+        // システムクロック定義
+        std::chrono::nanoseconds nano_receive_clock;
+        //std::chrono::nanoseconds nano_server_clock;
+        //std::chrono::nanoseconds delay_time;
+        
+        /*
+         CSVクラス初期化
+        */
+        // 出力するcsvファイルを指定して，インスタンスを作成
+        std::string baseName = "raspiA_time_";
+        std::string extension = ".csv";
+        // ファイル名を生成
+        std::string fileName = baseName + from_name + extension;
+        csv_lib::Csvedit csvWriter(fileName);
+        // csv_ヘッダを設定
+        csvWriter.csv_write_headers({"MRpx", "MRpy","MRth","CRpx", "CRpy","CRth","count","Time"});
+        // csvデータの型定義  
+        std::pair<std::pair<std::vector<double>, int> ,std::chrono::nanoseconds> csv_data;
+        /*
+         パルス波形を出力初期化
+        */
+        //GpioPulseGenerator pulseGenerator("gpiochip0", 16, 250, 500);
+        // データ受信を無限ループで行う
+        while (true) {
+            // UDP受信
+            std::pair<std::vector<double>, int> receivedData = udpConnection.udp_recv();// pairはfirst, secondで抽出可能
+            
+            //nano_server_clock = receivedData.second;
+            // 現在時刻取得
+            std::chrono::high_resolution_clock::time_point receive_clock = std::chrono::high_resolution_clock::now();
+            nano_receive_clock = std::chrono::duration_cast<std::chrono::nanoseconds>(receive_clock.time_since_epoch());
+            udpConnection_send_test.udp_send(receivedData.first, receivedData.second);
+            //パルス波形を出力
+            //pulseGenerator.start();
+            
+            // delay計算
+            //delay_time = nano_receive_clock - nano_server_clock;            
+
+            // 出力
+            std::cout << "roop_count : " << receivedData.second << std::endl;
+            //csv出力
+            csv_data = {receivedData, nano_receive_clock};
+            // データをペア型にして書き込み
+            csvWriter.csv_write_data(csv_data);
+
+            // 少し待機して次の受信へ（必要であれば待機時間を調整可能）
+            //std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
 
     } catch (const std::exception &e) {
@@ -114,10 +187,13 @@ int receive_1(){
 }
 
 int main(){
-    std::thread th1(server_1);
-    //std::thread th2(receive_1);
+    //std::thread th1(server_1);
+    std::thread th2(receive_1,"from_pcA", 4000);
+    std::thread th3(receive_0,"from_raspiC", 5000);
 
-    th1.join();
-    //th2.join();
+
+    //th1.join();
+    th2.join();
+    th3.join();
     return 0;
 }
