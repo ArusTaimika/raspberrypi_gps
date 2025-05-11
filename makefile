@@ -8,7 +8,7 @@ CFLAGS = -Wall
 TARGET = run
 
 # (4) コンパイル対象のソースコード
-SRCS = src/udp_send_time.cpp src/csv_edit.cpp src/udp_connect.cpp src/gpio_pulse.cpp
+SRCS = src/main.cpp src/select_location.cpp src/udp_connect.cpp
 
 # (5) オブジェクトファイル名
 OBJS = $(SRCS:.cpp=.o)
@@ -20,7 +20,7 @@ INCDIR = -I./include
 #  LIBDIR = 
 
 # (8) 追加するライブラリファイル
-LIBS = -lgpiod 
+#LIBS = -lgpiod 
 
 # (9) ターゲットファイル生成
 $(TARGET): $(OBJS)

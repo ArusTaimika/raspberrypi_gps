@@ -185,15 +185,3 @@ int receive_0(std::string from_name, int port){
 
     return EXIT_SUCCESS;
 }
-
-int main(){
-    //std::thread th1(server_1);
-    std::thread th2(receive_1,"from_pcA", 4000);
-    std::thread th3(receive_0,"from_raspiC", 5000);
-
-
-    //th1.join();
-    th2.join();
-    th3.join();
-    return 0;
-}
