@@ -24,11 +24,11 @@ UdpConnect::UdpConnect(std::string address, int port, size_t element_count) {
 }
 
 // UDP送信関数（double型データを送信）
-void UdpConnect::udp_send(const std::vector<double>& values, int roop_count) {
+void UdpConnect::udp_send(const std::vector<double>& values, long roop_count) {
     // valuesの値をbafferにコピー
     std::memcpy(buffer, values.data(), buffer_size);
     // nano_system_clockをbafferの末尾にコピー
-    std::memcpy(buffer + values.size() * sizeof(double), &roop_count, sizeof(int)); // ＋で末尾に移動
+    std::memcpy(buffer + values.size() * sizeof(double), &roop_count, sizeof(long)); // ＋で末尾に移動
     sendto(sock, buffer, total_buffer_size, 0, (struct sockaddr *)&addr, sizeof(addr));
 }
 
@@ -41,7 +41,7 @@ void UdpConnect::udp_bind() {
 }
 
 // UDP受信関数（double型データを受信）
-std::pair<std::vector<double>, int> UdpConnect::udp_recv() {
+std::pair<std::vector<double>, long> UdpConnect::udp_recv() {
     struct sockaddr_in sender_addr;
     socklen_t addr_len = sizeof(sender_addr);
     //データ受信
@@ -55,8 +55,8 @@ std::pair<std::vector<double>, int> UdpConnect::udp_recv() {
     std::vector<double> received_values(buffer_size / sizeof(double));
     std::memcpy(received_values.data(), buffer, buffer_size);
 
-    int roop_count;
-    std::memcpy(&roop_count, buffer + buffer_size, sizeof(int));
+    long roop_count;
+    std::memcpy(&roop_count, buffer + buffer_size, sizeof(long));
     return {received_values, roop_count};
 }
 

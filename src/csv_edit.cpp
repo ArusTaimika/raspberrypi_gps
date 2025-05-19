@@ -29,7 +29,7 @@ void Csvedit::csv_write_headers(const std::vector<std::string> &headers) {
 }
 
 // データをCSVファイルに書き込むメソッド
-void Csvedit::csv_write_data(const std::pair<std::pair<std::vector<double>, int> ,std::chrono::nanoseconds>  &data) {
+void Csvedit::csv_write_data(const std::vector<long>  &data) {
 
     if (!file.is_open()) {
         std::cerr << "ファイルを開けませんでした: " << filename << std::endl;
@@ -37,15 +37,12 @@ void Csvedit::csv_write_data(const std::pair<std::pair<std::vector<double>, int>
     }
 
     // vector<double>のデータを書き込み
-    for (size_t i = 0; i < data.first.first.size(); ++i) {
-        file << data.first.first[i];
-        if (i < data.first.first.size()) {
+    for (size_t i = 0; i < data.size(); ++i) {
+        file << data[i];
+        if (i < data.size()) {
             file << ","; // カンマで区切る
         }
     }
-    file << data.first.second;
-    file << ",";
-    file << data.second. count();
     file << "\n"; // 行末に改行を追加
     file.flush();  // バッファの内容をファイルに書き込む
 
