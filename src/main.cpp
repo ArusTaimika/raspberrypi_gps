@@ -28,7 +28,7 @@ int receive(std::vector<std::string> send_selected_ips, std::vector<int> send_se
             // 現在時刻取得
             std::chrono::high_resolution_clock::time_point receive_clock = std::chrono::high_resolution_clock::now();
             nano_receive_clock = std::chrono::duration_cast<std::chrono::nanoseconds>(receive_clock.time_since_epoch());
-            udpConnection_send_copy.udp_send(receivedData.first, nano_receive_clock.count());
+            udpConnection_send_copy.udp_send(receivedData.first, receivedData.second);
 
             // 出力
             std::cout << "roop_count : " << receivedData.second << std::endl;

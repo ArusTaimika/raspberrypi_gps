@@ -19,7 +19,7 @@ UdpConnect::UdpConnect(std::string address, int port, size_t element_count) {
     
     //bufferの値を定義
     buffer_size = element_count * sizeof(double);
-    total_buffer_size = buffer_size + sizeof(int);
+    total_buffer_size = buffer_size + sizeof(long);
     buffer = new char [total_buffer_size];
 }
 
