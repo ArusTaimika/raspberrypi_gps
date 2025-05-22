@@ -23,15 +23,15 @@ int receive(std::vector<std::string> send_selected_ips, std::vector<int> send_se
         // データ受信を無限ループで行う
         while (true) {
             // UDP受信
-            std::pair<std::vector<double>, long> receivedData = udpConnection_receive.udp_recv();// pairはfirst, secondで抽出可能
+            std::pair<std::vector<double>, int64_t> receivedData = udpConnection_receive.udp_recv();// pairはfirst, secondで抽出可能
             
             // 現在時刻取得
             std::chrono::high_resolution_clock::time_point receive_clock = std::chrono::high_resolution_clock::now();
             nano_receive_clock = std::chrono::duration_cast<std::chrono::nanoseconds>(receive_clock.time_since_epoch());
-            udpConnection_send_copy.udp_send(receivedData.first, receivedData.second);
+            udpConnection_send_copy.udp_send(receivedData.first, nano_receive_clock.count());
 
             // 出力
-            std::cout << "roop_count : " << receivedData.second << std::endl;
+            std::cout << "roop_count : " << nano_receive_clock.count() << std::endl;
         }
 
     } catch (const std::exception &e) {
@@ -58,19 +58,19 @@ int receive_test_from_BBB_1(){
         csv_lib::Csvedit csvWriter("from_BBB_1.csv");
         csvWriter.csv_write_headers({"send_time","recive_time"});
         // csvデータの型定義  
-        std::vector<long> csv_data;
+        std::vector<int64_t> csv_data;
 
         // データ受信を無限ループで行う
         while (true) {
             // UDP受信
-            std::pair<std::vector<double>, long> receivedData = udpConnection_receive.udp_recv();// pairはfirst, secondで抽出可能
+            std::pair<std::vector<double>, int64_t> receivedData = udpConnection_receive.udp_recv();// pairはfirst, secondで抽出可能
             
             // 現在時刻取得
             std::chrono::high_resolution_clock::time_point receive_clock = std::chrono::high_resolution_clock::now();
             nano_receive_clock = std::chrono::duration_cast<std::chrono::nanoseconds>(receive_clock.time_since_epoch());
 
             // 出力
-            std::cout << "delay_time : " << (nano_receive_clock.count() - receivedData.second) << std::endl;
+            //std::cout << "delay_time : " << (nano_receive_clock.count() - receivedData.second) << std::endl;
             //csv出力
             csv_data = {receivedData.second, nano_receive_clock.count()};
             // データをペア型にして書き込み
@@ -101,19 +101,19 @@ int receive_test_from_BBB_2(){
         csv_lib::Csvedit csvWriter("from_BBB_2.csv");
         csvWriter.csv_write_headers({"send_time","recive_time"});
         // csvデータの型定義  
-        std::vector<long> csv_data;
+        std::vector<int64_t> csv_data;
 
         // データ受信を無限ループで行う
         while (true) {
             // UDP受信
-            std::pair<std::vector<double>, long> receivedData = udpConnection_receive.udp_recv();// pairはfirst, secondで抽出可能
+            std::pair<std::vector<double>, int64_t> receivedData = udpConnection_receive.udp_recv();// pairはfirst, secondで抽出可能
             
             // 現在時刻取得
             std::chrono::high_resolution_clock::time_point receive_clock = std::chrono::high_resolution_clock::now();
             nano_receive_clock = std::chrono::duration_cast<std::chrono::nanoseconds>(receive_clock.time_since_epoch());
 
             // 出力
-            std::cout << "delay_time : " << (nano_receive_clock.count() - receivedData.second) << std::endl;
+            std::cout << "delay_time : " << ( receivedData.second) << std::endl;
             //csv出力
             csv_data = {receivedData.second, nano_receive_clock.count()};
             // データをペア型にして書き込み
@@ -138,8 +138,9 @@ int main(int argc, char* argv[]){
     selectlocation.set_locationip();
     std::cout << "send target location: "<< selectlocation.target_location << std::endl;
     std::cout << "my location: " << selectlocation.my_location << std::endl;
-    std::cout << "monitored IPAddress: " << argv[2] << std::endl;
-    std::cout << "motitored Port: " << argv[3] << std::endl;
+    std::cout << "copy robot IPAddress: " << selectlocation.target_copy_robot << std::endl;
+    std::cout << "monitored IPAddress: " << selectlocation.monitored_pc.first << std::endl;
+    std::cout << "motitored Port: " << selectlocation.monitored_pc.second<< std::endl;
 
     std::thread th1(receive, selectlocation.send_selected_ips, selectlocation.send_selected_port);
     std::thread th2(receive_test_from_BBB_1); // 実際に処理に使用する際の遅延

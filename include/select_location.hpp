@@ -22,6 +22,8 @@ class SelectLocation{
 
         std::pair<std::string,int> monitored_pc;
 
+        std::string target_copy_robot;
+
         char target_location  = 's';
         char my_location = 's';
 

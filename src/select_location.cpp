@@ -3,8 +3,9 @@
 
 namespace select_location {
     SelectLocation::SelectLocation(int argc, char* argv[]) {
-        monitored_pc = std::pair<std::string,int> {argv[2],std::stoi(argv[3])};
+        monitored_pc = std::pair<std::string,int> {argv[3],std::stoi(argv[4])};
         target_location = get_target_location(argv[1][0]);
+        target_copy_robot = argv[2];
         my_location = get_my_location();
     }
 
@@ -25,7 +26,7 @@ namespace select_location {
     }
     
     char SelectLocation::get_target_location(char location){
-        if(location != 'a' && location != 'b' && location != 'c' && location != 'd'){
+        if(location != 'a' && location != 'b' && location != 'c' && location != 'd' && location != 'o'){
             std::cerr << "入力が不正です" << std::endl;
             exit(EXIT_FAILURE);
         }
@@ -49,6 +50,9 @@ namespace select_location {
                     case 'd':
                         copy_ip = "100.77.38.13";
                         break;
+                    case 'o':
+                        copy_ip = target_copy_robot;
+                        break;
                 }
                 break;
             case 'b':
@@ -64,6 +68,9 @@ namespace select_location {
                         break;
                     case 'd':
                         copy_ip = "100.77.38.23";
+                        break;
+                    case 'o':
+                        copy_ip = target_copy_robot;
                         break;
                 }
                 break;
@@ -81,6 +88,9 @@ namespace select_location {
                     case 'd':
                         std::cerr << "選択できない" << std::endl; 
                         break;
+                    case 'o':
+                        copy_ip = target_copy_robot;
+                        break;
                 }
                 break;
             case 'd':
@@ -97,8 +107,12 @@ namespace select_location {
                     case 'd':
                         std::cerr << "選択できない" << std::endl; 
                         break;
+                    case 'o':
+                        copy_ip = target_copy_robot;
+                        break;
                 }
                 break;
+            
         }
         send_selected_ips = {copy_ip, /*to Master*/ monitored_pc.first  /*to TestPC*/};
         send_selected_port = {40000,monitored_pc.second};
