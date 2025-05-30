@@ -24,13 +24,13 @@ int receive(std::vector<std::string> send_selected_ips, std::vector<int> send_se
         std::vector<double> send_data{0,0,0,0,0,0};
 
         // CSVファイルの初期化
-        std::string csv_filename = "Location_" + std::string(1, my_location) + "info"+".csv";
+        std::string csv_filename = "output_file/Location_" + std::string(1, my_location) + "_pc"+".csv";
         csv_lib::Csvedit csvWriter(csv_filename);
-        csvWriter.csv_write_headers({"Time[ns]", "Master_Px[m]", "Master_Py[m]", "Master_Pt[rad]","Master_Vx[m/s]", "Master_Vy[m/s]", "Master_Vt[rad/s]", 
-                                     "Copy_1_Px[m]", "Copy_1_Py[m]", "Copy_1_Pt[rad]", "Copy_1_Vx[m/s]", "Copy_1_Vy[m/s]", "Copy_1_Vt[rad/s]",
-                                     "Copy_2_Px[m]", "Copy_2_Py[m]", "Copy_2_Pt[rad]", "Copy_2_Vx[m/s]", "Copy_2_Vy[m/s]", "Copy_2_Vt[rad/s]",});
+        csvWriter.csv_write_headers({"NaN","Time","Master_Px", "Master_Py", "Master_Pt[rad]","Master_Vx", "Master_Vy", "Master_Vt", 
+                                     "Copy_1_Px", "Copy_1_Py", "Copy_1_Pt[rad]", "Copy_1_Vx", "Copy_1_Vy", "Copy_1_Vt",
+                                     "Copy_2_Px", "Copy_2_Py", "Copy_2_Pt[rad]", "Copy_2_Vx", "Copy_2_Vy", "Copy_2_Vt"});
         // csvデータの型定義  
-        std::pair<std::int64_t, std::vector<double>> csv_data;
+        std::pair<std::vector<int64_t>, std::vector<double>> csv_data;
 
         // データ受信を無限ループで行う
         while (true) {
@@ -46,7 +46,7 @@ int receive(std::vector<std::string> send_selected_ips, std::vector<int> send_se
             // 出力
             std::cout << "roop_count : " << nano_receive_clock.count() << std::endl;
             //csv出力
-            csv_data = {nano_receive_clock.count(), receivedData.first};
+            csv_data = {{0,nano_receive_clock.count()}, receivedData.first};
             // データをペア型にして書き込み
             csvWriter.csv_write_data(csv_data);
         }
@@ -59,23 +59,30 @@ int receive(std::vector<std::string> send_selected_ips, std::vector<int> send_se
     return EXIT_SUCCESS;
 }
 
-int receive_test_from_BBB_1(){
+int receive_test_from_BBB_1(char my_location){
     try {
         /*
          UDP通信初期化
         */
         // IPアドレスとポート番号を指定して、UdpConnectインスタンスを作成
-        udp_lib::UdpConnect udpConnection_receive("0.0.0.0", 65000, 6);  // "0.0.0.0"はすべてのIPアドレスからの接続を受け入れる
+        udp_lib::UdpConnect udpConnection_receive("0.0.0.0", 65000, 26);  // "0.0.0.0"はすべてのIPアドレスからの接続を受け入れる
         // バインド（サーバーとして動作するために必要）
         udpConnection_receive.udp_bind();
         // システムクロック定義
         std::chrono::nanoseconds nano_receive_clock;
         
         // CSVファイルの初期化
-        csv_lib::Csvedit csvWriter("from_BBB_1.csv");
-        csvWriter.csv_write_headers({"send_time","recive_time"});
+        std::string csv_filename = "output_file/Location_" + std::string(1, my_location) + "_robot"+".csv";
+        csv_lib::Csvedit csvWriter(csv_filename);
+        csvWriter.csv_write_headers({"Send_Time","Receive_Time","Pos_Errx","Pos_Erry","Pos_Errt",
+                                     "Control_Velx","Control_Vely","Control_Velt",
+                                     "Wheel_Vel1","Wheel_Vel2","Wheel_Vel3",
+                                     "Motor_Volt1","Motor_Volt2","Motor_Volt3",
+                                     "Force_Act_Mag","Force_Act_Angle",
+                                     "Force_Virtualx","Force_Virtualy","Force_Virtual_Angle","Force_Virtual_Dist","Force_Virtual_Mag","Force_Virtual_Touch",
+                                     "Force_Idealx","Force_Idealy","Force_Ideal_Angle","Force_Ideal_Dist","Force_Ideal_Mag","Force_Ideal_Touch"});
         // csvデータの型定義  
-        std::vector<int64_t> csv_data;
+        std::pair<std::vector<int64_t>,std::vector<double>>  csv_data;
 
         // データ受信を無限ループで行う
         while (true) {
@@ -89,9 +96,9 @@ int receive_test_from_BBB_1(){
             // 出力
             //std::cout << "delay_time : " << (nano_receive_clock.count() - receivedData.second) << std::endl;
             //csv出力
-            //csv_data = {receivedData.second, nano_receive_clock.count()};
+            csv_data = {{receivedData.second, nano_receive_clock.count()},receivedData.first};
             // データをペア型にして書き込み
-            //csvWriter.csv_write_data(csv_data);
+            csvWriter.csv_write_data(csv_data);
         }
 
     } catch (const std::exception &e) {
@@ -117,9 +124,9 @@ int main(int argc, char* argv[]){
     std::cout << "motitored Port: " << selectlocation.monitored_pc.second<< std::endl;
 
     std::thread th1(receive, selectlocation.send_selected_ips, selectlocation.send_selected_port, selectlocation.my_location);
-    //std::thread th2(receive_test_from_BBB_1); // 実際に処理に使用する際の遅延
+    std::thread th2(receive_test_from_BBB_1, selectlocation.my_location); // 実際に処理に使用する際の遅延
     th1.join();
-    //th2.join();
+    th2.join();
 
     return 0;
 }

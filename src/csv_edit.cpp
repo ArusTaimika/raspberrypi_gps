@@ -29,14 +29,16 @@ void Csvedit::csv_write_headers(const std::vector<std::string> &headers) {
 }
 
 // データをCSVファイルに書き込むメソッド
-void Csvedit::csv_write_data(const std::pair<int64_t,std::vector<double>>   &data) {
+void Csvedit::csv_write_data(const std::pair<std::vector<int64_t>,std::vector<double>>   &data) {
 
     if (!file.is_open()) {
         std::cerr << "ファイルを開けませんでした: " << filename << std::endl;
         return;
     }
 
-    file << data.first;
+    file << data.first[0];
+    file << ",";
+    file << data.first[1];
     file << ",";
     // vector<double>のデータを書き込み
     for (size_t i = 0; i < data.second.size(); ++i) {
