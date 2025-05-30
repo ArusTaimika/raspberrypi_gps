@@ -97,9 +97,9 @@ int receive_test_from_BBB_1(std::pair<std::string,int> monitored_pc,char my_loca
             nano_receive_clock = std::chrono::duration_cast<std::chrono::nanoseconds>(receive_clock.time_since_epoch());
             delay_time = (nano_receive_clock.count() - receivedData.second) / 1000000.0; // ミリ秒単位に変換
             send_data.clear();
-            send_data.insert(send_data.end(), receivedData.first.begin()+13, receivedData.first.begin()+14);
-            send_data.insert(send_data.end(), receivedData.first.begin()+18, receivedData.first.begin()+19);
-            send_data.insert(send_data.end(), receivedData.first.begin()+24, receivedData.first.begin()+25);
+            send_data.insert(send_data.end(), receivedData.first.begin()+13, receivedData.first.begin()+15);
+            send_data.insert(send_data.end(), receivedData.first.begin()+18, receivedData.first.begin()+20);
+            send_data.insert(send_data.end(), receivedData.first.begin()+24, receivedData.first.begin()+26);
             send_data.push_back(delay_time); 
             udpConnection_send_monitore.udp_send(send_data, nano_receive_clock.count());
             // 出力
