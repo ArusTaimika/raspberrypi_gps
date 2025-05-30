@@ -59,13 +59,14 @@ int receive(std::vector<std::string> send_selected_ips, std::vector<int> send_se
     return EXIT_SUCCESS;
 }
 
-int receive_test_from_BBB_1(char my_location){
+int receive_test_from_BBB_1(std::pair<std::string,int> monitored_pc,char my_location){
     try {
         /*
          UDP通信初期化
         */
         // IPアドレスとポート番号を指定して、UdpConnectインスタンスを作成
         udp_lib::UdpConnect udpConnection_receive("0.0.0.0", 65000, 26);  // "0.0.0.0"はすべてのIPアドレスからの接続を受け入れる
+        udp_lib::UdpConnect udpConnection_send_monitore(monitored_pc.first, monitored_pc.second, 7);
         // バインド（サーバーとして動作するために必要）
         udpConnection_receive.udp_bind();
         // システムクロック定義
@@ -79,22 +80,30 @@ int receive_test_from_BBB_1(char my_location){
                                      "Wheel_Vel1","Wheel_Vel2","Wheel_Vel3",
                                      "Motor_Volt1","Motor_Volt2","Motor_Volt3",
                                      "Force_Act_Mag","Force_Act_Angle",
-                                     "Force_Virtualx","Force_Virtualy","Force_Virtual_Angle","Force_Virtual_Dist","Force_Virtual_Mag","Force_Virtual_Touch",
-                                     "Force_Idealx","Force_Idealy","Force_Ideal_Angle","Force_Ideal_Dist","Force_Ideal_Mag","Force_Ideal_Touch"});
+                                     "Force_Virtualx","Force_Virtualy","Force_Virtual_Dist","Force_Virtual_Angle","Force_Virtual_Mag","Force_Virtual_Touch",
+                                     "Force_Idealx","Force_Idealy","Force_Ideal_Dist","Force_Ideal_Angle","Force_Ideal_Mag","Force_Ideal_Touch"});
         // csvデータの型定義  
         std::pair<std::vector<int64_t>,std::vector<double>>  csv_data;
-
+         // 送信データの定義
+        std::vector<double> send_data(0.0,7);
+        double delay_time = 0.0; // 遅延時間の初期化
         // データ受信を無限ループで行う
         while (true) {
             // UDP受信
             std::pair<std::vector<double>, int64_t> receivedData = udpConnection_receive.udp_recv();// pairはfirst, secondで抽出可能
             
-            // 現在時刻取得
+            // 現在時刻取得v
             std::chrono::high_resolution_clock::time_point receive_clock = std::chrono::high_resolution_clock::now();
             nano_receive_clock = std::chrono::duration_cast<std::chrono::nanoseconds>(receive_clock.time_since_epoch());
-
+            delay_time = (nano_receive_clock.count() - receivedData.second) / 1000000.0; // ミリ秒単位に変換
+            send_data.clear();
+            send_data.insert(send_data.end(), receivedData.first.begin()+13, receivedData.first.begin()+14);
+            send_data.insert(send_data.end(), receivedData.first.begin()+18, receivedData.first.begin()+19);
+            send_data.insert(send_data.end(), receivedData.first.begin()+24, receivedData.first.begin()+25);
+            send_data.push_back(delay_time); 
+            udpConnection_send_monitore.udp_send(send_data, nano_receive_clock.count());
             // 出力
-            //std::cout << "delay_time : " << (nano_receive_clock.count() - receivedData.second) << std::endl;
+            //std::cout << "delay_time : " << delay_time << std::endl;
             //csv出力
             csv_data = {{receivedData.second, nano_receive_clock.count()},receivedData.first};
             // データをペア型にして書き込み
@@ -124,7 +133,7 @@ int main(int argc, char* argv[]){
     std::cout << "motitored Port: " << selectlocation.monitored_pc.second<< std::endl;
 
     std::thread th1(receive, selectlocation.send_selected_ips, selectlocation.send_selected_port, selectlocation.my_location);
-    std::thread th2(receive_test_from_BBB_1, selectlocation.my_location); // 実際に処理に使用する際の遅延
+    std::thread th2(receive_test_from_BBB_1,selectlocation.monitored_pc,selectlocation.my_location); // 実際に処理に使用する際の遅延
     th1.join();
     th2.join();
 
