@@ -85,7 +85,7 @@ int receive_test_from_BBB_1(std::pair<std::string,int> monitored_pc,char my_loca
         // csvデータの型定義  
         std::pair<std::vector<int64_t>,std::vector<double>>  csv_data;
          // 送信データの定義
-        std::vector<double> send_data(0.0,7);
+        std::vector<double> send_data(7,0.0);
         double delay_time = 0.0; // 遅延時間の初期化
         // データ受信を無限ループで行う
         while (true) {
