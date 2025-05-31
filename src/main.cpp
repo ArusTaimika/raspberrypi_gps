@@ -44,7 +44,7 @@ int receive(std::vector<std::string> send_selected_ips, std::vector<int> send_se
             udpConnection_send_copy.udp_send(send_data, nano_receive_clock.count());
             //udpConnection_send_raspi.udp_send(receivedData.first, nano_receive_clock.count());
             // 出力
-            std::cout << "roop_count : " << nano_receive_clock.count() << std::endl;
+            //std::cout << "roop_count : " << nano_receive_clock.count() << std::endl;
             //csv出力
             csv_data = {{0,nano_receive_clock.count()}, receivedData.first};
             // データをペア型にして書き込み
@@ -85,7 +85,7 @@ int receive_test_from_BBB_1(std::pair<std::string,int> monitored_pc,char my_loca
         // csvデータの型定義  
         std::pair<std::vector<int64_t>,std::vector<double>>  csv_data;
          // 送信データの定義
-        std::vector<double> send_data(7,0.0);
+        std::vector<double> send_data{0,0,0,0,0,0,0};
         double delay_time = 0.0; // 遅延時間の初期化
         // データ受信を無限ループで行う
         while (true) {
@@ -97,13 +97,13 @@ int receive_test_from_BBB_1(std::pair<std::string,int> monitored_pc,char my_loca
             nano_receive_clock = std::chrono::duration_cast<std::chrono::nanoseconds>(receive_clock.time_since_epoch());
             delay_time = (nano_receive_clock.count() - receivedData.second) / 1000000.0; // ミリ秒単位に変換
             send_data.clear();
-            send_data.insert(send_data.end(), receivedData.first.begin()+13, receivedData.first.begin()+15);
-            send_data.insert(send_data.end(), receivedData.first.begin()+18, receivedData.first.begin()+20);
-            send_data.insert(send_data.end(), receivedData.first.begin()+24, receivedData.first.begin()+26);
+            send_data.insert(send_data.end(), receivedData.first.begin()+12, receivedData.first.begin()+14);
+            send_data.insert(send_data.end(), receivedData.first.begin()+17, receivedData.first.begin()+19);
+            send_data.insert(send_data.end(), receivedData.first.begin()+23, receivedData.first.begin()+25);
             send_data.push_back(delay_time); 
             udpConnection_send_monitore.udp_send(send_data, nano_receive_clock.count());
             // 出力
-            //std::cout << "delay_time : " << delay_time << std::endl;
+            std::cout << "delay_time : " <<send_data[5]  << std::endl;
             //csv出力
             csv_data = {{receivedData.second, nano_receive_clock.count()},receivedData.first};
             // データをペア型にして書き込み
