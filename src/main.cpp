@@ -75,7 +75,7 @@ int receive_test_from_BBB_1(std::pair<std::string,int> monitored_pc,char my_loca
         // CSVファイルの初期化
         std::string csv_filename = "output_file/Location_" + std::string(1, my_location) + "_robot"+".csv";
         csv_lib::Csvedit csvWriter(csv_filename);
-        csvWriter.csv_write_headers({"Send_Time","Receive_Time","Pos_Errx","Pos_Erry","Pos_Errt",
+        csvWriter.csv_write_headers({"Send_Time","Receive_Time","Delay_Time","Pos_Errx","Pos_Erry","Pos_Errt",
                                      "Control_Velx","Control_Vely","Control_Velt",
                                      "Wheel_Vel1","Wheel_Vel2","Wheel_Vel3",
                                      "Motor_Volt1","Motor_Volt2","Motor_Volt3",
@@ -86,6 +86,7 @@ int receive_test_from_BBB_1(std::pair<std::string,int> monitored_pc,char my_loca
         std::pair<std::vector<int64_t>,std::vector<double>>  csv_data;
          // 送信データの定義
         std::vector<double> send_data{0,0,0,0,0,0,0};
+        std::vector<double> merged_data;
         double delay_time = 0.0; // 遅延時間の初期化
         // データ受信を無限ループで行う
         while (true) {
@@ -105,7 +106,10 @@ int receive_test_from_BBB_1(std::pair<std::string,int> monitored_pc,char my_loca
             // 出力
             std::cout << "delay_time : " <<send_data[5]  << std::endl;
             //csv出力
-            csv_data = {{receivedData.second, nano_receive_clock.count()},receivedData.first};
+            merged_data.clear();
+            merged_data.push_back(delay_time);
+            merged_data.insert(merged_data.end(), receivedData.first.begin(), receivedData.first.end());
+            csv_data = {{receivedData.second, nano_receive_clock.count()},merged_data};
             // データをペア型にして書き込み
             csvWriter.csv_write_data(csv_data);
         }
