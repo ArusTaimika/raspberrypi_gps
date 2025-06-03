@@ -26,7 +26,7 @@ int receive(std::vector<std::string> send_selected_ips, std::vector<int> send_se
         // CSVファイルの初期化
         std::string csv_filename = "output_file/Location_" + std::string(1, my_location) + "_pc"+".csv";
         csv_lib::Csvedit csvWriter(csv_filename);
-        csvWriter.csv_write_headers({"NaN","Time","Master_Px", "Master_Py", "Master_Pt[rad]","Master_Vx", "Master_Vy", "Master_Vt", 
+        csvWriter.csv_write_headers({"NaN","Receive_Time","Master_Px", "Master_Py", "Master_Pt[rad]","Master_Vx", "Master_Vy", "Master_Vt", 
                                      "Copy_1_Px", "Copy_1_Py", "Copy_1_Pt[rad]", "Copy_1_Vx", "Copy_1_Vy", "Copy_1_Vt",
                                      "Copy_2_Px", "Copy_2_Py", "Copy_2_Pt[rad]", "Copy_2_Vx", "Copy_2_Vy", "Copy_2_Vt"});
         // csvデータの型定義  
