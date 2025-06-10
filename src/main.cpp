@@ -1,10 +1,17 @@
 
 #include <iostream>
+#include <atomic>
+#include <csignal>
+#include <fstream>
+#include <filesystem>
 #include <chrono>
 #include <thread>
 #include "udp_connect.hpp"
 #include "select_location.hpp"
 #include "csv_edit.hpp"
+
+
+std::atomic<bool> running{true};
 
 int receive(std::vector<std::string> send_selected_ips, std::vector<int> send_selected_port, char my_location) {
     try {
@@ -24,7 +31,7 @@ int receive(std::vector<std::string> send_selected_ips, std::vector<int> send_se
         std::vector<double> send_data{0,0,0,0,0,0};
 
         // CSVファイルの初期化
-        std::string csv_filename = "output_file/PCA.csv";
+        std::string csv_filename = "output_file/PCA.csv";//std::string(1, my_location)+
         csv_lib::Csvedit csvWriter(csv_filename);
         csvWriter.csv_write_headers({"NaN","RT","PMRx", "PMRx", "AMRx","VgMRx", "VgMRy", "WgMR", 
                                      "PCR1x", "PCR1y", "ACR1", "VgCR1x", "VgCR1y", "WgCR1",
@@ -33,7 +40,7 @@ int receive(std::vector<std::string> send_selected_ips, std::vector<int> send_se
         std::pair<std::vector<int64_t>, std::vector<double>> csv_data;
 
         // データ受信を無限ループで行う
-        while (true) {
+        while (running) {
             // UDP受信
             std::pair<std::vector<double>, int64_t> receivedData = udpConnection_receive.udp_recv();// pairはfirst, secondで抽出可能
             
@@ -73,7 +80,7 @@ int receive_test_from_BBB_1(std::pair<std::string,int> monitored_pc,char my_loca
         std::chrono::nanoseconds nano_receive_clock;
         
         // CSVファイルの初期化
-        std::string csv_filename = "output_file/CRB.csv" /*+ std::string(1, my_location)*/;
+        std::string csv_filename = "output_file/CRB.csv";
         csv_lib::Csvedit csvWriter(csv_filename);
         csvWriter.csv_write_headers({"TT","RT","TD","Perrx","Perry","Aerr", // send time , receive time, delay time, position error x, position error y, angle error
                                      "Vcx","Vcy","Wc",
@@ -89,7 +96,7 @@ int receive_test_from_BBB_1(std::pair<std::string,int> monitored_pc,char my_loca
         std::vector<double> merged_data;
         double delay_time = 0.0; // 遅延時間の初期化
         // データ受信を無限ループで行う
-        while (true) {
+        while (running) {
             // UDP受信
             std::pair<std::vector<double>, int64_t> receivedData = udpConnection_receive.udp_recv();// pairはfirst, secondで抽出可能
             
@@ -125,23 +132,69 @@ int receive_test_from_BBB_1(std::pair<std::string,int> monitored_pc,char my_loca
 }
 
 
+void move_csv_PC(){
+    std::string local_file = "output_file/PCA.csv";
+    std::string remote_path = R"(/mnt/shared_csv/PCA.csv)"; // 共有フォルダのパスを指定
+    std::cout << "ファイル移動開始" << std::endl;
+    try {
+        std::filesystem::copy_file(local_file, remote_path, std::filesystem::copy_options::overwrite_existing);
+
+        // 移動にしたい場合は元ファイルを削除
+        //std::filesystem::remove(local_file);
+
+        std::cout << "ファイル移動完了" << std::endl;
+    } catch (std::filesystem::filesystem_error& e) {
+        std::cerr << "エラー: " << e.what() << std::endl;
+    }
+
+}
+
+void move_csv_CR(){
+    std::string local_file = "output_file/CRB.csv";
+    std::string remote_path = R"(/mnt/shared_csv/CRB.csv)"; // 共有フォルダのパスを指定
+    std::cout << "ファイル移動開始" << std::endl;
+    try {
+        std::filesystem::copy_file(local_file, remote_path, std::filesystem::copy_options::overwrite_existing);
+
+        // 移動にしたい場合は元ファイルを削除
+        //std::filesystem::remove(local_file);
+
+        std::cout << "ファイル移動完了" << std::endl;
+    } catch (std::filesystem::filesystem_error& e) {
+        std::cerr << "エラー: " << e.what() << std::endl;
+    }
+}
+
+void handle_sigint(int) {
+    std::cerr << "\nCtrl+C で終了処理開始..." << std::endl;
+    running = false;  // スレッドを止めるため
+}
+
 int main(int argc, char* argv[]){
     // argc[1]に選択したいlocationを渡す
     // argc[2]に監視用PCのIPアドレスを渡す
     // argc[3]に監視用PCのポート番号を渡す
     // 対象locationを渡す
-    select_location::SelectLocation selectlocation(argc, argv);
-    selectlocation.set_locationip();
-    std::cout << "send target location: "<< selectlocation.target_location << std::endl;
-    std::cout << "my location: " << selectlocation.my_location << std::endl;
-    std::cout << "copy robot IPAddress: " << selectlocation.target_copy_robot << std::endl;
-    std::cout << "monitored IPAddress: " << selectlocation.monitored_pc.first << std::endl;
-    std::cout << "motitored Port: " << selectlocation.monitored_pc.second<< std::endl;
-
-    std::thread th1(receive, selectlocation.send_selected_ips, selectlocation.send_selected_port, selectlocation.my_location);
-    std::thread th2(receive_test_from_BBB_1,selectlocation.monitored_pc,selectlocation.my_location); // 実際に処理に使用する際の遅延
-    th1.join();
-    th2.join();
-
+    try{
+        std::signal(SIGINT, handle_sigint);
+        select_location::SelectLocation selectlocation(argc, argv);
+        selectlocation.set_locationip();
+        std::cout << "send target location: "<< selectlocation.target_location << std::endl;
+        std::cout << "my location: " << selectlocation.my_location << std::endl;
+        std::cout << "copy robot IPAddress: " << selectlocation.target_copy_robot << std::endl;
+        std::cout << "monitored IPAddress: " << selectlocation.monitored_pc.first << std::endl;
+        std::cout << "motitored Port: " << selectlocation.monitored_pc.second<< std::endl;
+    
+        std::thread th1(receive, selectlocation.send_selected_ips, selectlocation.send_selected_port, selectlocation.my_location);
+        std::thread th2(receive_test_from_BBB_1,selectlocation.monitored_pc,selectlocation.my_location); // 実際に処理に使用する際の遅延
+        th1.join();
+        th2.join();
+    } catch (const std::exception &e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+    // ファイル移動
+    move_csv_PC();
+    move_csv_CR();
     return 0;
 }
