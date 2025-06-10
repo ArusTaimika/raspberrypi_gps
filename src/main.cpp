@@ -33,7 +33,7 @@ int receive(std::vector<std::string> send_selected_ips, std::vector<int> send_se
         // CSVファイルの初期化
         std::string csv_filename = "output_file/PCA.csv";//std::string(1, my_location)+
         csv_lib::Csvedit csvWriter(csv_filename);
-        csvWriter.csv_write_headers({"NaN","RT","PMRx", "PMRx", "AMRx","VgMRx", "VgMRy", "WgMR", 
+        csvWriter.csv_write_headers({"NaN","RT","PMRx", "PMRy", "AMRx","VgMRx", "VgMRy", "WgMR", 
                                      "PCR1x", "PCR1y", "ACR1", "VgCR1x", "VgCR1y", "WgCR1",
                                      "PCR2x", "PCR2y", "ACR2", "VgCR2x", "VgCR2y", "WgCR2"});
         // csvデータの型定義  
