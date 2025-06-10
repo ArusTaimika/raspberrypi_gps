@@ -109,8 +109,8 @@ int receive_test_from_BBB_1(std::pair<std::string,int> monitored_pc,char my_loca
             merged_data.clear();
             merged_data.push_back(delay_time);
             merged_data.insert(merged_data.end(), receivedData.first.begin(), receivedData.first.begin()+14);
-            merged_data.insert(merged_data.end(), receivedData.first.begin()+18, receivedData.first.begin()+19);
-            merged_data.insert(merged_data.end(), receivedData.first.begin()+24, receivedData.first.begin()+25);
+            merged_data.insert(merged_data.end(), receivedData.first.begin()+17, receivedData.first.begin()+19);
+            merged_data.insert(merged_data.end(), receivedData.first.begin()+23, receivedData.first.begin()+25);
             csv_data = {{receivedData.second, nano_receive_clock.count()},merged_data};
             // データをペア型にして書き込み
             csvWriter.csv_write_data(csv_data);
