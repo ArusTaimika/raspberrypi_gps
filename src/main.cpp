@@ -87,8 +87,8 @@ int receive_test_from_BBB_1(std::pair<std::string,int> monitored_pc,char my_loca
                                      "Ww1","Ww2","Ww3",
                                      "Vm1","Vm2","Vm3",
                                      "FEactM","FEactA",
-                                     "Force_Virtual_Mag","Force_Virtual_Angle",
-                                     "Force_Ideal_Mag","Force_Ideal_Angle"});
+                                     "FEvirM","FEvirA",
+                                     "FIdeaM","FIdeaA"});
         // csvデータの型定義  
         std::pair<std::vector<int64_t>,std::vector<double>>  csv_data;
          // 送信データの定義
