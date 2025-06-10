@@ -24,11 +24,11 @@ int receive(std::vector<std::string> send_selected_ips, std::vector<int> send_se
         std::vector<double> send_data{0,0,0,0,0,0};
 
         // CSVファイルの初期化
-        std::string csv_filename = "output_file/Location_" + std::string(1, my_location) + "_pc"+".csv";
+        std::string csv_filename = "output_file/PCA.csv";
         csv_lib::Csvedit csvWriter(csv_filename);
-        csvWriter.csv_write_headers({"NaN","Receive_Time","Master_Px", "Master_Py", "Master_Pt","Master_Vx", "Master_Vy", "Master_Vt", 
-                                     "Copy_1_Px", "Copy_1_Py", "Copy_1_Pt", "Copy_1_Vx", "Copy_1_Vy", "Copy_1_Vt",
-                                     "Copy_2_Px", "Copy_2_Py", "Copy_2_Pt", "Copy_2_Vx", "Copy_2_Vy", "Copy_2_Vt"});
+        csvWriter.csv_write_headers({"NaN","RT","PMRx", "PMRx", "AMRx","VgMRx", "VgMRy", "WgMR", 
+                                     "PCR1x", "PCR1y", "ACR1", "VgCR1x", "VgCR1y", "WgCR1",
+                                     "PCR2x", "PCR2y", "ACR2", "VgCR2x", "VgCR2y", "WgCR2"});
         // csvデータの型定義  
         std::pair<std::vector<int64_t>, std::vector<double>> csv_data;
 
@@ -73,15 +73,15 @@ int receive_test_from_BBB_1(std::pair<std::string,int> monitored_pc,char my_loca
         std::chrono::nanoseconds nano_receive_clock;
         
         // CSVファイルの初期化
-        std::string csv_filename = "output_file/Location_" + std::string(1, my_location) + "_robot"+".csv";
+        std::string csv_filename = "output_file/CRB.csv" /*+ std::string(1, my_location)*/;
         csv_lib::Csvedit csvWriter(csv_filename);
-        csvWriter.csv_write_headers({"Send_Time","Receive_Time","Delay_Time","Pos_Errx","Pos_Erry","Pos_Errt",
-                                     "Control_Velx","Control_Vely","Control_Velt",
-                                     "Wheel_Vel1","Wheel_Vel2","Wheel_Vel3",
-                                     "Motor_Volt1","Motor_Volt2","Motor_Volt3",
-                                     "Force_Act_Mag","Force_Act_Angle",
-                                     "Force_Virtualx","Force_Virtualy","Force_Virtual_Dist","Force_Virtual_Angle","Force_Virtual_Mag","Force_Virtual_Touch",
-                                     "Force_Idealx","Force_Idealy","Force_Ideal_Dist","Force_Ideal_Angle","Force_Ideal_Mag","Force_Ideal_Touch"});
+        csvWriter.csv_write_headers({"TT","RT","TD","Perrx","Perry","Aerr", // send time , receive time, delay time, position error x, position error y, angle error
+                                     "Vcx","Vcy","Wc",
+                                     "Ww1","Ww2","Ww3",
+                                     "Vm1","Vm2","Vm3",
+                                     "FEactM","FEactA",
+                                     "Force_Virtual_Mag","Force_Virtual_Angle",
+                                     "Force_Ideal_Mag","Force_Ideal_Angle"});
         // csvデータの型定義  
         std::pair<std::vector<int64_t>,std::vector<double>>  csv_data;
          // 送信データの定義
@@ -108,7 +108,9 @@ int receive_test_from_BBB_1(std::pair<std::string,int> monitored_pc,char my_loca
             //csv出力
             merged_data.clear();
             merged_data.push_back(delay_time);
-            merged_data.insert(merged_data.end(), receivedData.first.begin(), receivedData.first.end());
+            merged_data.insert(merged_data.end(), receivedData.first.begin(), receivedData.first.begin()+14);
+            merged_data.insert(merged_data.end(), receivedData.first.begin()+18, receivedData.first.end()+19);
+            merged_data.insert(merged_data.end(), receivedData.first.begin()+24, receivedData.first.end()+25);
             csv_data = {{receivedData.second, nano_receive_clock.count()},merged_data};
             // データをペア型にして書き込み
             csvWriter.csv_write_data(csv_data);
