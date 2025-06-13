@@ -7,9 +7,19 @@ UdpConnect::UdpConnect(std::string address, int port, size_t element_count) {
     /*
     UDP通信する相手のIPアドレスとポート番号が引数
     */
+
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0) {
         perror("Socket creation failed");
+        exit(EXIT_FAILURE);
+    }
+
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 50000;  // 50ミリ秒（必要に応じて調整）
+        
+    if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(tv)) < 0) {
+        perror("Error setting socket timeout");
         exit(EXIT_FAILURE);
     }
 

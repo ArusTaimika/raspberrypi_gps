@@ -13,6 +13,8 @@
 
 std::atomic<bool> running{true};
 
+std::string pc_name = "PCA.csv";
+std::string cr_name = "CRB.csv";
 int receive(std::vector<std::string> send_selected_ips, std::vector<int> send_selected_port, char my_location) {
     try {
         /*
@@ -31,7 +33,7 @@ int receive(std::vector<std::string> send_selected_ips, std::vector<int> send_se
         std::vector<double> send_data{0,0,0,0,0,0};
 
         // CSVファイルの初期化
-        std::string csv_filename = "output_file/PCA.csv";//std::string(1, my_location)+
+        std::string csv_filename = "output_file/"+pc_name;//std::string(1, my_location)+
         csv_lib::Csvedit csvWriter(csv_filename);
         csvWriter.csv_write_headers({"NaN","RT","PMRx", "PMRy", "AMRx","VgMRx", "VgMRy", "WgMR", 
                                      "PCR1x", "PCR1y", "ACR1", "VgCR1x", "VgCR1y", "WgCR1",
@@ -80,7 +82,7 @@ int receive_test_from_BBB_1(std::pair<std::string,int> monitored_pc,char my_loca
         std::chrono::nanoseconds nano_receive_clock;
         
         // CSVファイルの初期化
-        std::string csv_filename = "output_file/CRB.csv";
+        std::string csv_filename = "output_file/"+cr_name;
         csv_lib::Csvedit csvWriter(csv_filename);
         csvWriter.csv_write_headers({"TT","RT","TD","Perrx","Perry","Aerr", // send time , receive time, delay time, position error x, position error y, angle error
                                      "Vcx","Vcy","Wc",
@@ -133,8 +135,8 @@ int receive_test_from_BBB_1(std::pair<std::string,int> monitored_pc,char my_loca
 
 
 void move_csv_PC(){
-    std::string local_file = "output_file/PCA.csv";
-    std::string remote_path = R"(/mnt/shared_csv/PCA.csv)"; // 共有フォルダのパスを指定
+    std::string local_file = "output_file/"+pc_name;
+    std::string remote_path = R"(/mnt/shared_csv/)"+pc_name; // 共有フォルダのパスを指定
     std::cout << "ファイル移動開始" << std::endl;
     try {
         std::filesystem::copy_file(local_file, remote_path, std::filesystem::copy_options::overwrite_existing);
@@ -150,8 +152,8 @@ void move_csv_PC(){
 }
 
 void move_csv_CR(){
-    std::string local_file = "output_file/CRB.csv";
-    std::string remote_path = R"(/mnt/shared_csv/CRB.csv)"; // 共有フォルダのパスを指定
+    std::string local_file = "output_file/"+cr_name;
+    std::string remote_path = R"(/mnt/shared_csv/)"+cr_name; // 共有フォルダのパスを指定
     std::cout << "ファイル移動開始" << std::endl;
     try {
         std::filesystem::copy_file(local_file, remote_path, std::filesystem::copy_options::overwrite_existing);
@@ -193,6 +195,7 @@ int main(int argc, char* argv[]){
         std::cerr << "Error: " << e.what() << std::endl;
         return EXIT_FAILURE;
     }
+    std::cout << "Ctrl+C で終了処理完了" << std::endl;
     // ファイル移動
     move_csv_PC();
     move_csv_CR();
