@@ -15,7 +15,7 @@ std::atomic<bool> running{true};
 
 std::string pc_name = "PCA.csv";
 std::string cr_name = "CRB.csv";
-std::string raspi_name = "raspi_a.csv";
+std::string raspi_name = "raspiA.csv";
 std::string raspi_ip = "100.77.38.204";
 int receive(std::vector<std::string> send_selected_ips, std::vector<int> send_selected_port, char my_location) {
     try {
@@ -26,14 +26,14 @@ int receive(std::vector<std::string> send_selected_ips, std::vector<int> send_se
         udp_lib::UdpConnect udpConnection_receive("0.0.0.0", 60000, 18);  // "0.0.0.0"はすべてのIPアドレスからの接続を受け入れる
         //udp_lib::UdpConnect udpConnection_send_monitor(send_selected_ips[1], send_selected_port[1], 0);
         udp_lib::UdpConnect udpConnection_send_copy(send_selected_ips[0], send_selected_port[0], 6);
-        udp_lib::UdpConnect udpConnection_send_raspi("100.77.38.204", 66000, 26);
+        udp_lib::UdpConnect udpConnection_send_raspi("100.77.38.204", 62000, 26);
         // バインド（サーバーとして動作するために必要）
         udpConnection_receive.udp_bind();
         // システムクロック定義
         std::chrono::nanoseconds nano_receive_clock;
         // 送信データの定義
         std::vector<double> send_data{0,0,0,0,0,0};
-        std::vector<double> send_raspi{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // ダミーデータ
+        std::vector<double> send_raspi(26, 0.0); // ダミーデータ
         // CSVファイルの初期化
         std::string csv_filename = "output_file/"+pc_name;//std::string(1, my_location)+
         csv_lib::Csvedit csvWriter(csv_filename);
@@ -141,7 +141,7 @@ int receive_test_from_raspi(){
          UDP通信初期化
         */
         // IPアドレスとポート番号を指定して、UdpConnectインスタンスを作成
-        udp_lib::UdpConnect udpConnection_receive("0.0.0.0", 66000, 26);  // "0.0.0.0"はすべてのIPアドレスからの接続を受け入れる
+        udp_lib::UdpConnect udpConnection_receive("0.0.0.0", 62000, 26);  // "0.0.0.0"はすべてのIPアドレスからの接続を受け入れる
         // バインド（サーバーとして動作するために必要）
         udpConnection_receive.udp_bind();
         // システムクロック定義
