@@ -150,7 +150,7 @@ int receive_test_from_raspi(){
         // CSVファイルの初期化
         std::string csv_filename = "output_file/"+raspi_name;
         csv_lib::Csvedit csvWriter(csv_filename);
-        csvWriter.csv_write_headers({"TT","RT","TD"});
+        csvWriter.csv_write_headers({"TT","RT","TD","NaN"});
         // csvデータの型定義  
         std::pair<std::vector<int64_t>,std::vector<double>>  csv_data;
          // 送信データの定義
