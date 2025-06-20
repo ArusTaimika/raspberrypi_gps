@@ -1,4 +1,5 @@
 
+#include <cstdlib>
 #include <iostream>
 #include <atomic>
 #include <csignal>
@@ -17,6 +18,19 @@ std::string pc_name = "PCA.csv";
 std::string cr_name = "CRB.csv";
 std::string raspi_name = "raspiA.csv";
 std::string raspi_ip = "100.77.38.204";
+
+void set_cpu_governor(const std::string& governor) {
+    // CPUのガバナーを設定する関数
+    std::string command = "sudo cpufreq-set -g" + governor;
+    int ret = system(command.c_str());
+    if (ret != 0) {
+        std::cerr << "Error setting CPU governor to " << governor << std::endl;
+    } else {
+        std::cout << "CPU governor set to " << governor << std::endl;
+    }
+}
+
+
 int receive(std::vector<std::string> send_selected_ips, std::vector<int> send_selected_port, char my_location) {
     try {
         /*
@@ -26,7 +40,7 @@ int receive(std::vector<std::string> send_selected_ips, std::vector<int> send_se
         udp_lib::UdpConnect udpConnection_receive("0.0.0.0", 60000, 18);  // "0.0.0.0"はすべてのIPアドレスからの接続を受け入れる
         //udp_lib::UdpConnect udpConnection_send_monitor(send_selected_ips[1], send_selected_port[1], 0);
         udp_lib::UdpConnect udpConnection_send_copy(send_selected_ips[0], send_selected_port[0], 6);
-        udp_lib::UdpConnect udpConnection_send_raspi("100.77.38.204", 62000, 26);
+        udp_lib::UdpConnect udpConnection_send_raspi(raspi_ip, 62000, 26);
         // バインド（サーバーとして動作するために必要）
         udpConnection_receive.udp_bind();
         // システムクロック定義
@@ -243,6 +257,8 @@ int main(int argc, char* argv[]){
     // 対象locationを渡す
     try{
         std::signal(SIGINT, handle_sigint);
+        // CPUのガバナーを設定
+        set_cpu_governor("performance");
         select_location::SelectLocation selectlocation(argc, argv);
         selectlocation.set_locationip();
         std::cout << "send target location: "<< selectlocation.target_location << std::endl;
@@ -266,5 +282,6 @@ int main(int argc, char* argv[]){
     move_csv_PC();
     move_csv_CR();
     move_csv_raspi();
+    set_cpu_governor("ondemand");
     return 0;
 }
