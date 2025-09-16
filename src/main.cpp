@@ -129,7 +129,7 @@ int receive_test_from_BBB_1(std::pair<std::string,int> monitored_pc,char my_loca
             send_data.push_back(delay_time); 
             udpConnection_send_monitore.udp_send(send_data, nano_receive_clock.count());
             // 出力
-            std::cout << "delay_time : " <<send_data[5]  << std::endl;
+            std::cout << "delay_time : " << receivedData.second << std::endl;
             //csv出力
             merged_data.clear();
             merged_data.push_back(delay_time);
@@ -268,10 +268,10 @@ int main(int argc, char* argv[]){
         std::cout << "motitored Port: " << selectlocation.monitored_pc.second<< std::endl;
     
         std::thread th1(receive, selectlocation.send_selected_ips, selectlocation.send_selected_port, selectlocation.my_location);
-        std::thread th2(receive_test_from_BBB_1,selectlocation.monitored_pc,selectlocation.my_location); // 実際に処理に使用する際の遅延
+        //std::thread th2(receive_test_from_BBB_1,selectlocation.monitored_pc,selectlocation.my_location); // 実際に処理に使用する際の遅延
         std::thread th3(receive_test_from_raspi); // 実際に処理に使用する際の遅延
         th1.join();
-        th2.join();
+        //th2.join();
         th3.join();
     } catch (const std::exception &e) {
         std::cerr << "Error: " << e.what() << std::endl;
@@ -280,7 +280,7 @@ int main(int argc, char* argv[]){
     std::cout << "Ctrl+C で終了処理完了" << std::endl;
     // ファイル移動
     move_csv_PC();
-    move_csv_CR();
+    //move_csv_CR();
     move_csv_raspi();
     set_cpu_governor("ondemand");
     return 0;
