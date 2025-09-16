@@ -40,7 +40,7 @@ int receive(std::vector<std::string> send_selected_ips, std::vector<int> send_se
         udp_lib::UdpConnect udpConnection_receive("0.0.0.0", 60000, 18);  // "0.0.0.0"はすべてのIPアドレスからの接続を受け入れる
         //udp_lib::UdpConnect udpConnection_send_monitor(send_selected_ips[1], send_selected_port[1], 0);
         udp_lib::UdpConnect udpConnection_send_copy(send_selected_ips[0], send_selected_port[0], 6);
-        udp_lib::UdpConnect udpConnection_send_raspi(raspi_ip, 62000, 26);
+        //udp_lib::UdpConnect udpConnection_send_raspi(raspi_ip, 62000, 26);
         // バインド（サーバーとして動作するために必要）
         udpConnection_receive.udp_bind();
         // システムクロック定義
@@ -67,7 +67,7 @@ int receive(std::vector<std::string> send_selected_ips, std::vector<int> send_se
             nano_receive_clock = std::chrono::duration_cast<std::chrono::nanoseconds>(receive_clock.time_since_epoch());
             send_data.assign(receivedData.first.begin(), receivedData.first.begin()+6);
             udpConnection_send_copy.udp_send(send_data, nano_receive_clock.count());
-            udpConnection_send_raspi.udp_send(send_raspi, nano_receive_clock.count());
+            //udpConnection_send_raspi.udp_send(send_raspi, nano_receive_clock.count());
             // 出力
             //std::cout << "roop_count : " << nano_receive_clock.count() << std::endl;
             //csv出力
