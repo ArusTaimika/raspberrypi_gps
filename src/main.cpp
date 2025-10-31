@@ -46,7 +46,7 @@ int receive(std::vector<std::string> send_selected_ips, std::vector<int> send_se
         // システムクロック定義
         std::chrono::nanoseconds nano_receive_clock;
         // 送信データの定義
-        std::vector<double> send_data{0,0,0,0,0,0};
+        std::vector<double> send_data{0,0,0,0,0,0,0,0,0,0,0,0};
         std::vector<double> send_raspi(26, 0.0); // ダミーデータ
         // CSVファイルの初期化
         std::string csv_filename = "output_file/"+pc_name;//std::string(1, my_location)+
@@ -65,7 +65,7 @@ int receive(std::vector<std::string> send_selected_ips, std::vector<int> send_se
             // 現在時刻取得
             std::chrono::high_resolution_clock::time_point receive_clock = std::chrono::high_resolution_clock::now();
             nano_receive_clock = std::chrono::duration_cast<std::chrono::nanoseconds>(receive_clock.time_since_epoch());
-            send_data.assign(receivedData.first.begin(), receivedData.first.begin()+6);
+            send_data.assign(receivedData.first.begin(), receivedData.first.begin()+12);
             udpConnection_send_copy.udp_send(send_data, nano_receive_clock.count());
             //udpConnection_send_raspi.udp_send(send_raspi, nano_receive_clock.count());
             // 出力
@@ -281,7 +281,7 @@ int main(int argc, char* argv[]){
     // ファイル移動
     move_csv_PC();
     //move_csv_CR();
-    move_csv_raspi();
+    //move_csv_raspi();
     set_cpu_governor("ondemand");
     return 0;
 }
