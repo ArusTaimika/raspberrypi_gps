@@ -8,7 +8,7 @@ CFLAGS = -Wall
 TARGET = run
 
 # (4) コンパイル対象のソースコード
-SRCS = src/main.cpp src/select_location.cpp src/udp_connect.cpp src/csv_edit.cpp
+SRCS = src/main.cpp src/commandline.cpp src/cpu_manager.cpp src/udp_connect.cpp src/csv_edit.cpp
 
 # (5) オブジェクトファイル名
 OBJS = $(SRCS:.cpp=.o)
