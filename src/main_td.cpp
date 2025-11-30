@@ -44,23 +44,26 @@ int receive( std::vector<std::string> send_selected_ips) {
         // csvデータの型定義  
         std::pair<std::vector<int64_t>, std::vector<double>> csv_data;
         std::cout << "[Info] Start receiving UDP data..." << std::endl;
+        double count = 0;
         // データ受信を無限ループで行う
         while (running) {
             // UDP受信
-            std::pair<std::vector<double>, int64_t> receivedData = udpConnection_receive.udp_recv();// pairはfirst, secondで抽出可能
-            
+            //std::pair<std::vector<double>, int64_t> receivedData = udpConnection_receive.udp_recv();// pairはfirst, secondで抽出可能
+            std::this_thread::sleep_for(std::chrono::milliseconds(100)); // ダミー待機   
             // 現在時刻取得
             std::chrono::high_resolution_clock::time_point receive_clock = std::chrono::high_resolution_clock::now();
             nano_receive_clock = std::chrono::duration_cast<std::chrono::nanoseconds>(receive_clock.time_since_epoch());
-            send_data.assign(receivedData.first.begin(), receivedData.first.begin()+12);
-            udpConnection_send_copy.udp_send(send_data, nano_receive_clock.count());
+            //send_data.assign(receivedData.first.begin(), receivedData.first.begin()+12);
+            ///////udpConnection_send_copy.udp_send(send_data, nano_receive_clock.count());
+            send_raspi[0]  = count;
             udpConnection_send_raspi.udp_send(send_raspi, nano_receive_clock.count());
             // 出力
             //std::cout << "roop_count : " << nano_receive_clock.count() << std::endl;
             //csv出力
-            csv_data = {{0,nano_receive_clock.count()}, receivedData.first};
+            ///////////csv_data = {{0,nano_receive_clock.count()}, receivedData.first};
             // データをペア型にして書き込み
-            csvWriter.csv_write_data(csv_data);
+            /////csvWriter.csv_write_data(csv_data);
+            count += 1;
             
         }
 
@@ -105,10 +108,11 @@ int receive_test_from_raspi(){
             // 出力
             //std::cout << "delay_time : " <<send_data[5]  << std::endl;
             //csv出力
-            send_data = {delay_time, 0};
+            send_data = {delay_time, receivedData.first[0]};
             csv_data = {{receivedData.second, nano_receive_clock.count()},send_data};
             // データをペア型にして書き込み
             csvWriter.csv_write_data(csv_data);
+            std::cout << "Count: " << receivedData.first[0] << " Delay: " << delay_time <<std::endl;
         }
 
     } catch (const std::exception &e) {
@@ -178,9 +182,9 @@ int main(int argc, char* argv[]){
     }
     std::cout << "[Info] Ctrl+C end..." << std::endl;
     // ファイル移動
-    move_csv_PC();
+    ////move_csv_PC();
     //move_csv_CR();
-    move_csv_raspi();
+    /////move_csv_raspi();
     set_cpu_governor("ondemand");
     return 0;
 }
