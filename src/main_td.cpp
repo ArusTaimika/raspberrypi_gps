@@ -27,7 +27,7 @@ int receive( std::vector<std::string> send_selected_ips) {
         // IPアドレスとポート番号を指定して、UdpConnectインスタンスを作成
         udp_lib::UdpConnect udpConnection_receive("0.0.0.0", 60000, 18);  // "0.0.0.0"はすべてのIPアドレスからの接続を受け入れる
         udp_lib::UdpConnect udpConnection_send_copy(send_selected_ips[0], 40000, 12);
-        udp_lib::UdpConnect udpConnection_send_raspi(send_selected_ips[1], 62000, 26);
+        udp_lib::UdpConnect udpConnection_send_raspi("100.89.64.113", 62000, 26);
         // バインド（サーバーとして動作するために必要）
         udpConnection_receive.udp_bind();
         // システムクロック定義
@@ -49,7 +49,7 @@ int receive( std::vector<std::string> send_selected_ips) {
         while (running) {
             // UDP受信
             //std::pair<std::vector<double>, int64_t> receivedData = udpConnection_receive.udp_recv();// pairはfirst, secondで抽出可能
-            std::this_thread::sleep_for(std::chrono::milliseconds(100)); // ダミー待機   
+            std::this_thread::sleep_for(std::chrono::milliseconds(10)); // ダミー待機   
             // 現在時刻取得
             std::chrono::high_resolution_clock::time_point receive_clock = std::chrono::high_resolution_clock::now();
             nano_receive_clock = std::chrono::duration_cast<std::chrono::nanoseconds>(receive_clock.time_since_epoch());

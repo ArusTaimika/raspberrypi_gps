@@ -16,18 +16,16 @@
 
 std::atomic<bool> running{true};
 
-std::string pc_name = "PCA.csv";
-std::string raspi_name = "raspiA.csv";
-
-int receive( std::vector<std::string> send_selected_ips) {
+int receive( std::vector<std::string> selectlocation) {
     try {
         /*
          UDP通信初期化
         */
         // IPアドレスとポート番号を指定して、UdpConnectインスタンスを作成
         udp_lib::UdpConnect udpConnection_receive("0.0.0.0", 60000, 18);  // "0.0.0.0"はすべてのIPアドレスからの接続を受け入れる
-        udp_lib::UdpConnect udpConnection_send_copy(send_selected_ips[0], 40000, 12);
-        udp_lib::UdpConnect udpConnection_send_raspi(send_selected_ips[1], 62000, 26);
+        udp_lib::UdpConnect udpConnection_send_copy(selectlocation[0], 40000, 12);
+        udp_lib::UdpConnect udpConnection_send_raspi(selectlocation[1], 62000, 26);
+        udp_lib::UdpConnect udpConnection_send_monitorpc("100.124.38.52", std::stoi(selectlocation[4]), 18);
         // バインド（サーバーとして動作するために必要）
         udpConnection_receive.udp_bind();
         // システムクロック定義
@@ -36,7 +34,7 @@ int receive( std::vector<std::string> send_selected_ips) {
         std::vector<double> send_data(12, 0.0);
         std::vector<double> send_raspi(26, 0.0); // ダミーデータ
         // CSVファイルの初期化
-        std::string csv_filename = "output_file/"+pc_name;//std::string(1, my_location)+
+        std::string csv_filename = "output_file/"+selectlocation[2];//std::string(1, my_location)+
         csv_lib::Csvedit csvWriter(csv_filename);
         csvWriter.csv_write_headers({"NaN","RT","PMRx", "PMRy", "AMRx","VgMRx", "VgMRy", "WgMR", 
                                      "PCR1x", "PCR1y", "ACR1", "VgCR1x", "VgCR1y", "WgCR1",
@@ -55,8 +53,9 @@ int receive( std::vector<std::string> send_selected_ips) {
             send_data.assign(receivedData.first.begin(), receivedData.first.begin()+12);
             udpConnection_send_copy.udp_send(send_data, nano_receive_clock.count());
             udpConnection_send_raspi.udp_send(send_raspi, nano_receive_clock.count());
+            udpConnection_send_monitorpc.udp_send(receivedData.first, receivedData.second);
             // 出力
-            //std::cout << "roop_count : " << nano_receive_clock.count() << std::endl;
+            //std::cout << "roop_count : " << receivedData.second << std::endl;
             //csv出力
             csv_data = {{0,nano_receive_clock.count()}, receivedData.first};
             // データをペア型にして書き込み
@@ -72,7 +71,7 @@ int receive( std::vector<std::string> send_selected_ips) {
     return EXIT_SUCCESS;
 }
 
-int receive_test_from_raspi(){
+int receive_test_from_raspi(std::vector<std::string> selectlocation){
     try {
         /*
          UDP通信初期化
@@ -85,7 +84,7 @@ int receive_test_from_raspi(){
         std::chrono::nanoseconds nano_receive_clock;
         
         // CSVファイルの初期化
-        std::string csv_filename = "output_file/"+raspi_name;
+        std::string csv_filename = "output_file/"+selectlocation[3];
         csv_lib::Csvedit csvWriter(csv_filename);
         csvWriter.csv_write_headers({"TT","RT","TD","NaN"});
         // csvデータの型定義  
@@ -119,9 +118,9 @@ int receive_test_from_raspi(){
     return EXIT_SUCCESS;
 }
 
-void move_csv_PC(){
-    std::string local_file = "output_file/"+pc_name;
-    std::string remote_path = R"(/mnt/shared_csv/)"+pc_name; // 共有フォルダのパスを指定
+void move_csv_PC(std::vector<std::string> selectlocation){
+    std::string local_file = "output_file/"+selectlocation[2];
+    std::string remote_path = R"(/mnt/shared_csv/)"+selectlocation[2]; // 共有フォルダのパスを指定
     std::cout << "[Info] Moving file from " << local_file << " to " << remote_path << std::endl;
     try {
         std::filesystem::copy_file(local_file, remote_path, std::filesystem::copy_options::overwrite_existing);
@@ -136,9 +135,9 @@ void move_csv_PC(){
 
 }
 
-void move_csv_raspi(){
-    std::string local_file = "output_file/"+raspi_name;
-    std::string remote_path = R"(/mnt/shared_csv/)"+raspi_name; // 共有フォルダのパスを指定
+void move_csv_raspi(std::vector<std::string> selectlocation){
+    std::string local_file = "output_file/"+selectlocation[3];
+    std::string remote_path = R"(/mnt/shared_csv/)"+selectlocation[3]; // 共有フォルダのパスを指定
     std::cout << "[Info] Moving file from " << local_file << " to " << remote_path << std::endl;
     try {
         std::filesystem::copy_file(local_file, remote_path, std::filesystem::copy_options::overwrite_existing);
@@ -169,18 +168,18 @@ int main(int argc, char* argv[]){
         std::vector<std::string> selectlocation = parse_command_line(argc, argv);
 
         std::thread th1(receive, selectlocation);
-        std::thread th2(receive_test_from_raspi); //
+        std::thread th2(receive_test_from_raspi, selectlocation); //
         th1.join();
         th2.join();
+        // ファイル移動
+        move_csv_PC(selectlocation);
+        //move_csv_CR();
+        move_csv_raspi(selectlocation);
     } catch (const std::exception &e) {
         std::cerr << "[Error] " << e.what() << std::endl;
         return EXIT_FAILURE;
     }
     std::cout << "[Info] Ctrl+C end..." << std::endl;
-    // ファイル移動
-    move_csv_PC();
-    //move_csv_CR();
-    move_csv_raspi();
     set_cpu_governor("ondemand");
     return 0;
 }

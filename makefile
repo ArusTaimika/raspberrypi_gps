@@ -5,10 +5,10 @@ CC = g++
 CFLAGS = -Wall 
 
 # (3) 実行ファイル名
-TARGET = one
+TARGET = run
 
 # (4) コンパイル対象のソースコード
-SRCS = src/main_td.cpp src/commandline.cpp src/cpu_manager.cpp src/udp_connect.cpp src/csv_edit.cpp
+SRCS = src/main.cpp src/commandline.cpp src/cpu_manager.cpp src/udp_connect.cpp src/csv_edit.cpp
 
 # (5) オブジェクトファイル名
 OBJS = $(SRCS:.cpp=.o)

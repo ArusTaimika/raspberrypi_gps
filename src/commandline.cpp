@@ -15,11 +15,12 @@ std::string get_my_name(){
 
 
 std::vector<std::string> parse_command_line(int argc, char* argv[]){
-    if (argc < 4){
+    if (argc < 5){
         std::cerr << "[Error] Not enough arguments" << std::endl;
         std::cerr << "[Info] 1:local or tailscale \n"
                   << "       2:Target CopyRobot name (e.g., cra1, crb1, crc1, cra2, crb2, crc2, cra3, crb3) \n"
                   << "       3:Target location (e.g., a, b, c, d) \n"
+                  << "       4:My location number (e.g., 0, 1, 2) \n"
         << std::endl;
         exit(1);
     }
@@ -89,5 +90,26 @@ std::vector<std::string> parse_command_line(int argc, char* argv[]){
     std::string target_raspi_ip = head_ip + it2->second;
     std::cout << "[Info] Target CopyRobot IP: " << target_copyrobot_ip << std::endl;
     std::cout << "[Info] Target raspi IP: " << target_raspi_ip << std::endl;
-    return {target_copyrobot_ip, target_raspi_ip};
+
+    // CSV filenames
+    std::string pc_name = "PC"+my_name+".csv";
+    std::string raspi_name = "raspi"+my_name+".csv";
+    // My location number
+    std::string my_location_number = argv[4];
+    std::string monitored_pc_port = "50222";
+    if (my_location_number != "0" && my_location_number != "1" && my_location_number != "2"){
+        std::cerr << "[Error] Invalid My location number" << std::endl;
+        std::exit(1);
+    }
+    else if (my_location_number == "0"){
+        monitored_pc_port = "50222";
+    }
+    else if (my_location_number == "1"){
+        monitored_pc_port = "51222";
+    }
+    else if (my_location_number == "2"){
+        monitored_pc_port = "52222";
+    }
+    std::cout << "[Info] Monitored PC Location: " << monitored_pc_port << std::endl;
+    return {target_copyrobot_ip, target_raspi_ip, pc_name, raspi_name, monitored_pc_port};
 }
