@@ -1,3 +1,4 @@
 /.raspberrypi_gps/
 *.o
 /run
+*.csv
